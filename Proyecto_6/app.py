@@ -235,5 +235,22 @@ def eliminar_tutoria(id):
     cur.close()
     return jsonify({"msg": "Tutoría eliminada exitosamente"}), 200
 
+# Endpoint de consulta avanzada para mostrar asignaturas con más solicitudes
+@app.route('/asignaturas_mas_solicitadas', methods=['GET'])
+def asignaturas_mas_solicitadas():
+    cur = mysql.connection.cursor()
+    cur.execute("""SELECT S.asignatura AS Asignatura, COUNT(S.id_solicitud) AS Cantidad_Solicitudes,
+                COUNT(DISTINCT S.id_estudiante) AS Alumnos_Unicos_Solicitantes
+                FROM Solicitudes S
+                GROUP BY S.asignatura
+                ORDER BY Cantidad_Solicitudes DESC;""")
+    rows = cur.fetchall()
+    cur.close()
+    
+    resultado = []
+    for row in rows:
+        resultado.append({'asignatura': row[0], 'total_solicitudes': row[1], 'alumnos_unicos': row[2]})
+    return jsonify(resultado), 200
+
 if __name__ == '__main__':
     app.run(debug=True)
