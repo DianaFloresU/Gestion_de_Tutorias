@@ -235,5 +235,43 @@ def eliminar_tutoria(id):
     cur.close()
     return jsonify({"msg": "Tutoría eliminada exitosamente"}), 200
 
+@app.route('/tutorias_por_fecha', methods=['GET'])
+@jwt_required()
+def tutorias_por_fecha():
+    fecha_inicio = request.args.get('fecha_inicio')
+    fecha_fin = request.args.get('fecha_fin')
+    
+    if not fecha_inicio or not fecha_fin:
+        return jsonify({"msg": "Debe proporcionar fecha_inicio y fecha_fin en formato YYYY-MM-DD"}), 400
+    
+    cursor = mysql.connection.cursor()
+    cursor.execute("""
+        SELECT t.id_tutoria, s.asignatura,
+               CONCAT(e.nombre, ' ', e.apellido) AS estudiante,
+               CONCAT(tu.nombre, ' ', tu.apellido) AS tutor,
+               t.fecha_hora, t.estado_tutoria
+        FROM tutorias t
+        JOIN solicitudes s ON t.id_solicitud = s.id_solicitud
+        JOIN estudiantes e ON s.id_estudiante = e.id_estudiante
+        JOIN tutores tu ON t.id_tutor = tu.id_tutor
+        WHERE DATE(t.fecha_hora) BETWEEN %s AND %s
+        ORDER BY t.fecha_hora DESC """,
+    (fecha_inicio, fecha_fin))
+    rows = cursor.fetchall()
+    cursor.close()
+    
+    resultado = []
+    for row in rows:
+        resultado.append({
+            'id_tutoria': row[0],
+            'asignatura': row[1],
+            'estudiante': row[2],
+            'tutor': row[3],
+            'fecha_hora': str(row[4]),
+            'estado': row[5]
+        })
+    return jsonify(resultado), 200
+
+
 if __name__ == '__main__':
     app.run(debug=True)
