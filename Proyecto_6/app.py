@@ -272,6 +272,39 @@ def tutorias_por_fecha():
         })
     return jsonify(resultado), 200
 
+@app.route('/api/reportes/alumnos_demandantes', methods=['GET'])
+@jwt_required()
+def reporte_alumnos_demandantes():
+    usuario_actual = get_jwt_identity()
+    
+    if usuario_actual != 'admin':
+        return jsonify({"msg": "Acceso denegado. Se requieren permisos de administrador."}), 403
+        
+    cur = mysql.connection.cursor()
+    cur.execute("""
+        SELECT 
+            e.id_estudiante,
+            CONCAT(e.nombre, ' ', e.apellido) AS nombre_estudiante,
+            e.carrera,
+            COUNT(s.id_solicitud) AS total_solicitudes
+        FROM estudiantes e
+        INNER JOIN solicitudes s ON e.id_estudiante = s.id_estudiante
+        GROUP BY e.id_estudiante, e.nombre, e.apellido, e.carrera
+        ORDER BY total_solicitudes DESC
+    """)
+    resultados = cur.fetchall()
+    cur.close()
+    
+    respuesta = []
+    for fila in resultados:
+        respuesta.append({
+            "estudiante_id": fila[0],
+            "nombre": fila[1],
+            "carrera": fila[2],
+            "total_materias": fila[3]
+        })
+        
+    return jsonify(respuesta), 200
 
 if __name__ == '__main__':
     app.run(debug=True)
