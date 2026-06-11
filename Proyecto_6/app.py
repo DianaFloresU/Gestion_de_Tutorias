@@ -252,5 +252,76 @@ def asignaturas_mas_solicitadas():
         resultado.append({'asignatura': row[0], 'total_solicitudes': row[1], 'alumnos_unicos': row[2]})
     return jsonify(resultado), 200
 
+@app.route('/tutorias_por_fecha', methods=['GET'])
+@jwt_required()
+def tutorias_por_fecha():
+    fecha_inicio = request.args.get('fecha_inicio')
+    fecha_fin = request.args.get('fecha_fin')
+    
+    if not fecha_inicio or not fecha_fin:
+        return jsonify({"msg": "Debe proporcionar fecha_inicio y fecha_fin en formato YYYY-MM-DD"}), 400
+    
+    cursor = mysql.connection.cursor()
+    cursor.execute("""
+        SELECT t.id_tutoria, s.asignatura,
+               CONCAT(e.nombre, ' ', e.apellido) AS estudiante,
+               CONCAT(tu.nombre, ' ', tu.apellido) AS tutor,
+               t.fecha_hora, t.estado_tutoria
+        FROM tutorias t
+        JOIN solicitudes s ON t.id_solicitud = s.id_solicitud
+        JOIN estudiantes e ON s.id_estudiante = e.id_estudiante
+        JOIN tutores tu ON t.id_tutor = tu.id_tutor
+        WHERE DATE(t.fecha_hora) BETWEEN %s AND %s
+        ORDER BY t.fecha_hora DESC """,
+    (fecha_inicio, fecha_fin))
+    rows = cursor.fetchall()
+    cursor.close()
+    
+    resultado = []
+    for row in rows:
+        resultado.append({
+            'id_tutoria': row[0],
+            'asignatura': row[1],
+            'estudiante': row[2],
+            'tutor': row[3],
+            'fecha_hora': str(row[4]),
+            'estado': row[5]
+        })
+    return jsonify(resultado), 200
+
+@app.route('/api/reportes/alumnos_demandantes', methods=['GET'])
+@jwt_required()
+def reporte_alumnos_demandantes():
+    usuario_actual = get_jwt_identity()
+    
+    if usuario_actual != 'admin':
+        return jsonify({"msg": "Acceso denegado. Se requieren permisos de administrador."}), 403
+        
+    cur = mysql.connection.cursor()
+    cur.execute("""
+        SELECT 
+            e.id_estudiante,
+            CONCAT(e.nombre, ' ', e.apellido) AS nombre_estudiante,
+            e.carrera,
+            COUNT(s.id_solicitud) AS total_solicitudes
+        FROM estudiantes e
+        INNER JOIN solicitudes s ON e.id_estudiante = s.id_estudiante
+        GROUP BY e.id_estudiante, e.nombre, e.apellido, e.carrera
+        ORDER BY total_solicitudes DESC
+    """)
+    resultados = cur.fetchall()
+    cur.close()
+    
+    respuesta = []
+    for fila in resultados:
+        respuesta.append({
+            "estudiante_id": fila[0],
+            "nombre": fila[1],
+            "carrera": fila[2],
+            "total_materias": fila[3]
+        })
+        
+    return jsonify(respuesta), 200
+
 if __name__ == '__main__':
     app.run(debug=True)
