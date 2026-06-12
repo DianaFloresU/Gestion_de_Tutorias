@@ -4,68 +4,120 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+
     <style>
         html, body {
             width: 100%;
             height: 100%;
             margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #0b132b;
+            color: #ffffff;
         }
 
         .container-principal {
             display: flex;
             justify-content: center;
             align-items: center;
-            background-color: beige;
             width: 100%;
             height: 100%;
         }
 
         .container-login {
-            border: 1px solid black;
-            background-color: white;
-            border-radius: 35px;
-            width: 350px;
-            height: 350px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
+            background-color: #1c2541; 
+            border-radius: 15px; 
+            width: 380px;
             padding: 40px;
             box-sizing: border-box;
+            box-shadow: 0px 8px 24px rgba(0, 0, 0, 0.3);
+            text-align: center;
+        }
+
+        h2 {
+            margin-top: 0;
+            margin-bottom: 25px;
+            font-size: 26px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .input-group {
+            width: 100%;
+            margin-bottom: 20px;
+            text-align: left;
         }
 
         input {
             width: 100%;
-            padding: 10px;
-            margin: 10px 0;
-            border: 1px solid #ccc;
-            border-radius: 20px;
-        }
-        button {
-            width: 100%;
-            padding: 10px;
-            margin-top: 10px;
-            background-color: black;
-            color: white;
-            border: none;
-            border-radius: 20px;
-            cursor:pointer
+            padding: 14px;
+            background-color: #0b132b; 
+            border: 1px solid #3a506b; 
+            border-radius: 8px;
+            box-sizing: border-box;
+            color: #ffffff;
+            font-size: 15px;
+            transition: border-color 0.3s, box-shadow 0.3s;
         }
 
-        button:hover{
-            background-color: #333;
+        input:focus {
+            outline: none;
+            border-color: #00b4d8; 
+            box-shadow: 0 0 8px rgba(0, 180, 216, 0.4);
+        }
+
+        input::placeholder {
+            color: #6c757d;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            margin-top: 10px;
+            background-color: #0077b6; 
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: background-color 0.2s, transform 0.1s;
+        }
+
+        button:hover {
+            background-color: #0096c7; 
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        p {
+            margin-top: 25px;
+            margin-bottom: 0;
+            font-size: 13px;
+            color: #a2a8d3;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        
+        p:hover {
+            color: #00b4d8;
+            text-decoration: underline;
         }
     </style>
 </head>
 <body>
-
     <div class="container-principal">
         <div class="container-login">    
-            <h2>Login </h2>
-            <input type="text" placeholder="Usuario" id="username">
-            <input type="password" placeholder="Contraseña" id="password">
+            <h2>Iniciar Sesión</h2>
+            <div class="input-group">
+                <input type="email" placeholder="Correo Institucional" id="email" required>
+            </div>
+            <div class="input-group">
+                <input type="password" placeholder="Contraseña" id="password" required>
+            </div>
             <button type="button" onclick="login()">Ingresar</button>
-            <p>¿Has olvidado contraseña?</p>
+            <p>¿Has olvidado tu contraseña?</p>
         </div>
     </div>
     <script src="{{ url_for('static',  filename='login.js') }}"></script>

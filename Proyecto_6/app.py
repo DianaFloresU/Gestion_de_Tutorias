@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, render_template
 from flask_mysqldb import MySQL
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 from datetime import timedelta
@@ -21,29 +21,90 @@ jwt = JWTManager(app)
 @app.route('/login', methods=['POST'])
 def login():
     data = request.get_json()
-    username = data.get('username')
+    email = data.get('email')
     password = data.get('password')
-
-    # Autenticación simplificada para fines de desarrollo del sistema
-    if username == 'admin' and password == 'password123':
-        access_token = create_access_token(identity=username)
-        return jsonify(access_token=access_token), 200
     
-    return jsonify({"msg": "Credenciales incorrectas"}), 401
+    # Contraseña fija 123
+    if password != '123':
+        return jsonify({"msg": "Contraseña incorrecta"}), 401
+    if not email:
+        return jsonify({"msg": "El correo es obligatorio"}), 400
+
+    cursor = mysql.connection.cursor()
+    cursor.execute("SELECT nombre, apellido FROM Estudiantes WHERE email = %s", (email,))
+    estudiante = cursor.fetchone()
+
+    if estudiante:
+        cursor.close()
+        nombre_completo = f"{estudiante[0]} {estudiante[1]}"
+        access_token = create_access_token(identity=email)
+        return jsonify({
+            "access_token": access_token,
+            "rol": "estudiante",
+            "nombre": nombre_completo
+        }), 200
+
+    cursor.execute("SELECT nombre, apellido FROM Tutores WHERE email = %s", (email,))
+    tutor = cursor.fetchone()
+    cursor.close()
+
+    if tutor:
+        nombre_completo = f"{tutor[0]} {tutor[1]}"
+        access_token = create_access_token(identity=email)
+        return jsonify({
+            "access_token": access_token,
+            "rol": "tutor",
+            "nombre": nombre_completo
+        }), 200
+
+    return jsonify({"msg": "El correo no está registrado en el sistema"}), 404
+
+# Dashboard estudiante
+@app.route('/dashboard_estudiante', methods=['GET'])
+def dashboard_estudiante():
+    return render_template("dashboard_estudiante.html")
 
 # Endpoint para mostrar estudiantes
 
 @app.route('/mostrar_estudiantes', methods=['GET'])
 def mostrar_estudiantes():
-    cur = mysql.connection.cursor()
-    cur.execute("SELECT * FROM Estudiantes")
-    rows = cur.fetchall()
-    cur.close()
+    cursor = mysql.connection.cursor()
+    cursor.execute("SELECT * FROM Estudiantes")
+    rows = cursor.fetchall()
+    cursor.close()
     
     estudiantes = []
     for row in rows:
         estudiantes.append({'id': row[0], 'nombre': row[1], 'apellido': row[2], 'carrera': row[3], 'email': row[4]})
     return jsonify(estudiantes), 200
+
+# Mostrar las tutorias del estudiante con id
+
+@app.route('/mis_tutorias', methods=['GET'])
+@jwt_required()
+def mis_tutorias():
+    correo_estudiante = get_jwt_identity()
+    cur = mysql.connection.cursor()
+    cur.execute("SELECT id_estudiante FROM estudiantes WHERE email = %s", (correo_estudiante,))
+    estudiante = cur.fetchone()
+    
+    if not estudiante:
+        cur.close()
+        return jsonify({"msg": "Estudiante no encontrado"}), 404
+        
+    id_estudiante = estudiante[0]
+
+    sql = """
+        SELECT t.id_tutoria, s.asignatura, t.fecha_hora, t.aula_o_link, t.estado_tutoria 
+        FROM tutorias t
+        INNER JOIN solicitudes s ON t.id_solicitud = s.id_solicitud
+        WHERE s.id_estudiante = %s
+    """
+    cur.execute(sql, (id_estudiante,))
+    columnas = ['id_tutoria', 'asignatura', 'fecha_hora', 'aula_o_link', 'estado_tutoria']
+    resultado = [dict(zip(columnas, fila)) for fila in cur.fetchall()]  
+    cur.close()
+    return jsonify(resultado), 200
 
 # Endpoint para agregar estudiante, requiere autenticación JWT
 
@@ -82,6 +143,10 @@ def eliminar_estudiante(id):
     cur.close()
     return jsonify({"msg": "Estudiante eliminado exitosamente"}), 200
 
+# Dashboard tutor
+@app.route('/dashboard_tutor', methods=['GET'])
+def dashboard_tutor():
+    return render_template("dashboard_tutor.html")
 # Endpoint para mostrar tutores
 
 @app.route('/mostrar_tutores', methods=['GET'])
