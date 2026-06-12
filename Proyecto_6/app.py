@@ -323,5 +323,13 @@ def reporte_alumnos_demandantes():
         
     return jsonify(respuesta), 200
 
+@app.route('/')
+def sesion():
+    return render_template("login.html")
+
+@app.route('/dashboard')
+def inicio():
+    return render_template("index.html")
+
 if __name__ == '__main__':
     app.run(debug=True)
