@@ -399,6 +399,7 @@ def login():
 def dashboard_tutor():
     return render_template("dashboard_tutor.html")
 
+# endpoint login tutores
 @app.route('/solicitudes_tutor', methods=['GET'])
 @jwt_required()
 def solicitudes_tutor():
