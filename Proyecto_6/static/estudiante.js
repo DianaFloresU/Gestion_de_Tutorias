@@ -108,3 +108,40 @@ function cerrarSesion() {
     localStorage.clear();
     window.location.href = "/";
 }
+
+function consultarTutoriasPorFecha() {
+    const token = localStorage.getItem("token");
+    const fechaInicio = document.getElementById("fecha_inicio").value;
+    const fechaFin = document.getElementById("fecha_fin").value;
+
+    if (!fechaInicio || !fechaFin) {
+        alert("Debe seleccionar ambas fechas");
+        return;
+    }
+
+    fetch(`http://127.0.0.1:5000/tutorias_por_fecha?fecha_inicio=${fechaInicio}&fecha_fin=${fechaFin}`, {
+        headers: { "Authorization": `Bearer ${token}` }
+    })
+    .then(res => res.json())
+    .then(data => {
+        let html = '<div class="table-responsive"><table class="tabla-tutorias"><thead><tr><th>ID</th><th>Asignatura</th><th>Estudiante</th><th>Tutor</th><th>Fecha/Hora</th><th>Estado</th></tr></thead><tbody>';
+        if (data.length === 0) {
+            html += '<tr><td colspan="6" class="text-center">No hay tutorías en ese rango</td></tr>';
+        } else {
+            data.forEach(t => {
+                html += `<tr>
+                            <td>${t.id_tutoria}</td>
+                            <td>${t.asignatura}</td>
+                            <td>${t.estudiante}</td>
+                            <td>${t.tutor}</td>
+                            <td>${t.fecha_hora}</td>
+                            <td>${t.estado}</td>
+                         </tr>`;
+            });
+        }
+        html += '</tbody></table></div>';
+        // Mostrar resultados debajo del botón
+        document.getElementById("resultado-consulta").innerHTML = html;
+    })
+    .catch(error => console.error("Error al consultar:", error));
+}
