@@ -2,6 +2,7 @@ from flask import Flask, jsonify, request, render_template
 from flask_mysqldb import MySQL
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 from datetime import timedelta
+from datetime import datetime, date
 
 app = Flask(__name__)
 
@@ -17,47 +18,6 @@ app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=2)
 
 mysql = MySQL(app)
 jwt = JWTManager(app)
-
-@app.route('/login', methods=['POST'])
-def login():
-    data = request.get_json()
-    email = data.get('email')
-    password = data.get('password')
-    
-    # Contraseña fija 123
-    if password != '123':
-        return jsonify({"msg": "Contraseña incorrecta"}), 401
-    if not email:
-        return jsonify({"msg": "El correo es obligatorio"}), 400
-
-    cursor = mysql.connection.cursor()
-    cursor.execute("SELECT nombre, apellido FROM Estudiantes WHERE email = %s", (email,))
-    estudiante = cursor.fetchone()
-
-    if estudiante:
-        cursor.close()
-        nombre_completo = f"{estudiante[0]} {estudiante[1]}"
-        access_token = create_access_token(identity=email)
-        return jsonify({
-            "access_token": access_token,
-            "rol": "estudiante",
-            "nombre": nombre_completo
-        }), 200
-
-    cursor.execute("SELECT nombre, apellido FROM Tutores WHERE email = %s", (email,))
-    tutor = cursor.fetchone()
-    cursor.close()
-
-    if tutor:
-        nombre_completo = f"{tutor[0]} {tutor[1]}"
-        access_token = create_access_token(identity=email)
-        return jsonify({
-            "access_token": access_token,
-            "rol": "tutor",
-            "nombre": nombre_completo
-        }), 200
-
-    return jsonify({"msg": "El correo no está registrado en el sistema"}), 404
 
 # Dashboard estudiante
 @app.route('/dashboard_estudiante', methods=['GET'])
@@ -143,10 +103,6 @@ def eliminar_estudiante(id):
     cur.close()
     return jsonify({"msg": "Estudiante eliminado exitosamente"}), 200
 
-# Dashboard tutor
-@app.route('/dashboard_tutor', methods=['GET'])
-def dashboard_tutor():
-    return render_template("dashboard_tutor.html")
 # Endpoint para mostrar tutores
 
 @app.route('/mostrar_tutores', methods=['GET'])
@@ -395,6 +351,116 @@ def sesion():
 @app.route('/dashboard')
 def inicio():
     return render_template("index.html")
+
+@app.route('/login', methods=['POST'])
+def login():
+    data = request.get_json()
+    email = data.get('email')
+    password = data.get('password')
+    
+    if not email:
+        return jsonify({"msg": "El correo es obligatorio"}), 400
+    if password != '123':
+        return jsonify({"msg": "Contraseña incorrecta"}), 401
+
+    cursor = mysql.connection.cursor()
+    
+    cursor.execute("SELECT id_estudiante, nombre, apellido FROM Estudiantes WHERE email = %s", (email,))
+    estudiante = cursor.fetchone()
+
+    if estudiante:
+        cursor.close()
+        nombre_completo = f"{estudiante[1]} {estudiante[2]}"
+        access_token = create_access_token(identity=email)
+        return jsonify({
+            "access_token": access_token,
+            "rol": "estudiante",
+            "nombre": nombre_completo,
+            "id": estudiante[0]
+        }), 200
+
+    cursor.execute("SELECT id_tutor, nombre, apellido FROM Tutores WHERE email = %s", (email,))
+    tutor = cursor.fetchone()
+    cursor.close()
+
+    if tutor:
+        nombre_completo = f"{tutor[1]} {tutor[2]}"
+        access_token = create_access_token(identity=email)
+        return jsonify({
+            "access_token": access_token,
+            "rol": "tutor",
+            "nombre": nombre_completo,
+            "id": tutor[0]
+        }), 200
+
+    return jsonify({"msg": "El correo no está registrado en el sistema"}), 404
+
+@app.route('/dashboard_tutor', methods=['GET'])
+def dashboard_tutor():
+    return render_template("dashboard_tutor.html")
+
+@app.route('/solicitudes_tutor', methods=['GET'])
+@jwt_required()
+def solicitudes_tutor():
+    cursor = mysql.connection.cursor()
+    
+    query = """
+        SELECT 
+            s.id_solicitud, 
+            CONCAT(e.nombre, ' ', e.apellido) AS estudiante, 
+            s.asignatura, 
+            s.descripcion_problema AS descripcion, 
+            s.fecha_solicitud AS fecha, 
+            s.estado
+        FROM Solicitudes s
+        JOIN Estudiantes e ON s.id_estudiante = e.id_estudiante
+        WHERE LOWER(s.estado) = 'pendiente'
+    """
+    cursor.execute(query)
+    columnas = [col[0] for col in cursor.description]
+    resultados = []
+    
+    for fila in cursor.fetchall():
+        dicc = dict(zip(columnas, fila))
+        if isinstance(dicc['fecha'], (datetime, date)):
+            dicc['fecha'] = dicc['fecha'].isoformat()
+        resultados.append(dicc)
+        
+    cursor.close()
+    return jsonify(resultados), 200
+
+@app.route('/tutorias_tutor', methods=['GET'])
+@jwt_required()
+def tutorias_tutor():
+    email_tutor = get_jwt_identity()
+    cursor = mysql.connection.cursor()
+    
+    query = """
+        SELECT 
+            t.id_tutoria, 
+            s.asignatura, 
+            t.fecha_hora, 
+            t.aula_o_link, 
+            t.estado_tutoria
+        FROM Tutorias t
+        JOIN Solicitudes s ON t.id_solicitud = s.id_solicitud
+        JOIN Tutores tut ON t.id_tutor = tut.id_tutor
+        WHERE tut.email = %s
+    """
+    cursor.execute(query, (email_tutor,))
+    columnas = [col[0] for col in cursor.description]
+    resultados = []
+    
+    for fila in cursor.fetchall():
+        dicc = dict(zip(columnas, fila))
+        if isinstance(dicc['fecha_hora'], (datetime, date)):
+            dicc['fecha_hora'] = dicc['fecha_hora'].isoformat()
+        resultados.append(dicc)
+        
+    cursor.close()
+    return jsonify(resultados), 200
+
+
 
 if __name__ == '__main__':
     app.run(debug=True)

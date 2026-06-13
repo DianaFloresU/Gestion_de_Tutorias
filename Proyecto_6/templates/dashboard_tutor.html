@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Control - Tutor</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            background-color: #0b132b; 
+            color: #ffffff;
+        }
+        
+        header {
+            background-color: #1c2541; 
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #3a506b;
+            box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        header h2 {
+            margin: 0;
+            font-size: 22px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-logout {
+            padding: 8px 16px;
+            background-color: #e63946; 
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.2s;
+        }
+
+        .btn-logout:hover {
+            background-color: #c1121f;
+        }
+
+        .main-container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        nav {
+            width: 25%;
+            background-color: #1c2541;
+            border-right: 1px solid #3a506b;
+            padding: 25px 20px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        nav button {
+            display: block;
+            width: 100%;
+            padding: 14px 18px;
+            background-color: #0b132b;
+            color: #a2a8d3;
+            border: 1px solid #3a506b;
+            border-radius: 8px;
+            text-align: left;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        nav button:hover {
+            border-color: #00b4d8;
+            color: #ffffff;
+        }
+
+        nav button.active {
+            background-color: #0077b6; 
+            color: #ffffff;
+            border-color: #00b4d8;
+            box-shadow: 0px 4px 10px rgba(0, 119, 182, 0.3);
+        }
+
+        main {
+            width: 75%;
+            padding: 40px;
+            box-sizing: border-box;
+            overflow-y: auto;
+        }
+
+        .content-section {
+            display: none;
+            background: #1c2541;
+            padding: 35px;
+            border-radius: 12px;
+            border: 1px solid #3a506b;
+            box-shadow: 0px 6px 18px rgba(0, 0, 0, 0.2);
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        .content-section h3 {
+            margin-top: 0;
+            margin-bottom: 25px;
+            font-size: 22px;
+            border-bottom: 2px solid #3a506b;
+            padding-bottom: 10px;
+            color: #00b4d8;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th, td {
+            padding: 14px;
+            border-bottom: 1px solid #3a506b;
+            text-align: left;
+            font-size: 14px;
+        }
+
+        th {
+            background-color: #0b132b;
+            color: #00b4d8;
+            font-weight: 600;
+        }
+
+        tr:hover {
+            background-color: rgba(58, 80, 107, 0.2);
+        }
+    </style>
+    <script>
+        if (!localStorage.getItem("token") || localStorage.getItem("rol") !== "tutor") {
+            window.location.replace("/");
+        }
+    </script>
+</head>
+<body>
+
+    <header>
+        <h2>Panel de Acompañamiento Académico - Tutores</h2>
+        <div>
+            <span id="nombre-usuario" style="font-weight: 600; margin-right: 20px; color: #00b4d8;">Tutor</span>
+            <button class="btn-logout" onclick="cerrarSesion()">Cerrar Sesión</button>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <nav>
+            <button class="active" onclick="cambiarSeccion('solicitudes-asignadas', this)">Solicitudes Asignadas</button>
+            <button onclick="cambiarSeccion('mis-tutorias-tutor', this)">Mis Sesiones de Tutoría</button>
+        </nav>
+
+        <main>
+            <section id="solicitudes-asignadas" class="content-section active">
+                <h3>Solicitudes de Tutoría de Estudiantes</h3>
+                <p>A continuación se muestran los estudiantes que requieren apoyo en tus asignaturas:</p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID Solicitud</th>
+                            <th>Estudiante</th>
+                            <th>Asignatura</th>
+                            <th>Descripción del Problema</th>
+                            <th>Fecha Solicitud</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla-solicitudes-estudiantes">
+                    </tbody>
+                </table>
+            </section>
+
+            <section id="mis-tutorias-tutor" class="content-section">
+                <h3>Agenda de Tutorías Programadas</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID Tutoría</th>
+                            <th>Asignatura</th>
+                            <th>Fecha y Hora</th>
+                            <th>Aula / Enlace</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla-tutorias-tutor">
+                    </tbody>
+                </table>
+            </section>
+        </main>
+    </div>
+
+    <script>
+            const token = localStorage.getItem("token");
+
+            document.addEventListener("DOMContentLoaded", () => {
+                const nombre = localStorage.getItem("nombre");
+                if (nombre) {
+                    document.getElementById("nombre-usuario").innerText = nombre;
+                }
+                cargarSolicitudesEstudiantes();
+                cargarTutoriasAsignadas();
+            });
+
+            function cambiarSeccion(idSeccion, boton) {
+                document.querySelectorAll(".content-section").forEach(s => s.classList.remove("active"));
+                document.querySelectorAll("nav button").forEach(b => b.classList.remove("active"));
+                
+                document.getElementById(idSeccion).classList.add("active");
+                boton.classList.add("active");
+            }
+
+            function cargarSolicitudesEstudiantes() {
+                fetch("http://127.0.0.1:5000/solicitudes_tutor", {
+                    method: "GET",
+                    headers: { "Authorization": `Bearer ${token}` }
+                })
+                .then(res => res.json())
+                .then(data => {
+                    const tabla = document.getElementById("tabla-solicitudes-estudiantes");
+                    if (!tabla || !data) return;
+                    tabla.innerHTML = "";
+
+                    data.forEach(solicitud => {
+                       
+                        const fechaObjeto = new Date(solicitud.fecha);
+                        const opciones = { 
+                            year: 'numeric', 
+                            month: 'long', 
+                            day: 'numeric' 
+                        };
+                        
+                        const fechaFormateada = fechaObjeto.toLocaleDateString('es-ES', opciones);
+
+                        tabla.innerHTML += `
+                            <tr>
+                                <td>${solicitud.id_solicitud}</td>
+                                <td>${solicitud.estudiante}</td>
+                                <td>${solicitud.asignatura}</td>
+                                <td>${solicitud.descripcion}</td>
+                                <td>${fechaFormateada}</td>
+                                <td><span class="badge pendiente">${solicitud.estado}</span></td>
+                            </tr>`;
+                    });
+                })
+                .catch(error => console.error("Error al cargar solicitudes de estudiantes:", error));
+            }
+
+            function cargarTutoriasAsignadas() {
+                fetch("http://127.0.0.1:5000/tutorias_tutor", {
+                    method: "GET",
+                    headers: { "Authorization": `Bearer ${token}` }
+                })
+                .then(res => res.json())
+                .then(data => {
+                    const tabla = document.getElementById("tabla-tutorias-tutor");
+                    if (!tabla || !data) return;
+                    tabla.innerHTML = "";
+
+                    data.forEach(tutoria => {
+                        const fechaObjeto = new Date(tutoria.fecha_hora);
+                        const opciones = { 
+                            year: 'numeric', 
+                            month: 'long', 
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                        };
+                        const fechaHoraFormateada = fechaObjeto.toLocaleDateString('es-ES', opciones);
+
+                        tabla.innerHTML += `
+                            <tr>
+                                <td>${tutoria.id_tutoria}</td>
+                                <td>${tutoria.asignatura}</td>
+                                <td>${fechaHoraFormateada}</td>
+                                <td>${tutoria.aula_o_link}</td>
+                                <td><span class="badge programada">${tutoria.estado_tutoria}</span></td>
+                            </tr>`;
+                    });
+                })
+                .catch(error => console.error("Error al cargar tutorías de la agenda:", error));
+            }
+    </script>
+</body>
+</html>

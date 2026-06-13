@@ -1,6 +1,6 @@
 function login(){
-    const email = document.getElementById("email").value
-    const password = document.getElementById("password").value
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
     if (!email || !password) {
         alert("Por favor, introduce tu correo y contraseña.");
         return;
@@ -24,7 +24,8 @@ function login(){
         if(resultado.status === 200) {
             localStorage.setItem("token", resultado.data.access_token);
             localStorage.setItem("rol", resultado.data.rol);
-            localStorage.setItem("nombre", resultado.data.nombre)
+            localStorage.setItem("nombre", resultado.data.nombre);
+            localStorage.setItem("id", resultado.data.id);
             
             if(resultado.data.rol === "tutor") {
                 window.location.href = "/dashboard_tutor";

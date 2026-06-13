@@ -1,5 +1,6 @@
 const token = localStorage.getItem("token");
 const nombre = localStorage.getItem("nombre");
+const usuarioId = localStorage.getItem("id");
 
 document.addEventListener("DOMContentLoaded", () => {
     if (nombre) {
@@ -38,7 +39,7 @@ function cargarMisTutorias() {
         data.forEach(tutoria => {
             const fechaHora = new Date(tutoria.fecha_hora);
             const opcionesFecha= { 
-                wekday: 'long',
+                weekday: 'long',
                 year: 'numeric',
                 month: 'long',
                 day: 'numeric',
@@ -78,6 +79,7 @@ function enviarSolicitud(event) {
     const fechaInicio = document.getElementById("fecha-inicio").value;
 
     const datosSolicitud = {
+        id_estudiante: usuarioId, // <-- Esta línea se aumentó
         asignatura: asignatura,
         descripcion_problema: descripcion,
         fecha_solicitud: fechaInicio,
