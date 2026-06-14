@@ -31,6 +31,8 @@ function login(){
                 window.location.href = "/dashboard_tutor";
             } else if(resultado.data.rol === "estudiante") {
                 window.location.href = "/dashboard_estudiante";
+            } else if(resultado.data.rol === "admin") {
+                window.location.href = "/dashboard"
             }
         } else {
             alert(resultado.data.msg || "Error al ingresar");

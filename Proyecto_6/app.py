@@ -361,7 +361,7 @@ def sesion():
 
 @app.route('/dashboard')
 def inicio():
-    return render_template("index.html")
+    return render_template("dashboard_administrador.html")
 
 @app.route('/login', methods=['POST'])
 def login():
@@ -371,9 +371,21 @@ def login():
     
     if not email:
         return jsonify({"msg": "El correo es obligatorio"}), 400
+    if not password:
+        return jsonify({"msg": "La contraseña es obligatoria"}), 400
+    
+    if email == 'admin' and password == '123':
+        access_token = create_access_token(identity=email)
+        return jsonify({
+            "access_token": access_token,
+            "rol": "admin",                     
+            "nombre": "Administrador General", 
+            "id": 0
+        }), 200
+        
     if password != '123':
         return jsonify({"msg": "Contraseña incorrecta"}), 401
-
+    
     cursor = mysql.connection.cursor()
     
     cursor.execute("SELECT id_estudiante, nombre, apellido FROM Estudiantes WHERE email = %s", (email,))
@@ -403,8 +415,8 @@ def login():
             "nombre": nombre_completo,
             "id": tutor[0]
         }), 200
-
     return jsonify({"msg": "El correo no está registrado en el sistema"}), 404
+
 
 @app.route('/dashboard_tutor', methods=['GET'])
 def dashboard_tutor():
