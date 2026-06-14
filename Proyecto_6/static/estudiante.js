@@ -72,7 +72,7 @@ function cargarMisTutorias() {
 
             tabla.innerHTML += `
                 <tr>
-                    <td>${tutoria.id_solicitud}</td>
+                    <td>${tutoria.id_tutoria !== null ? tutoria.id_tutoria : tutoria.id_solicitud}</td>
                     <td>Solicitud #${tutoria.asignatura}</td>
                     <td>${fechaEsp}</td>
                     <td>${lugarTexto}</td>
