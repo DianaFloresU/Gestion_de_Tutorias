@@ -18,22 +18,14 @@
     <header>
       <h2>Panel de Administración</h2>
       <div>
-        <span
-          id="nombre-usuario"
-          style="font-weight: 600; margin-right: 20px; color: #00b4d8"
-          >Administrador</span
-        >
-        <button class="btn-logout" onclick="cerrarSesion()">
-          Cerrar Sesión
-        </button>
+        <span id="nombre-usuario" style="font-weight: 600; margin-right: 20px; color: #00b4d8">Administrador</span>
+        <button class="btn-logout" onclick="cerrarSesion()">Cerrar Sesión</button>
       </div>
     </header>
 
     <div class="main-container">
       <nav>
-        <button class="active" onclick="show('estudiantes', this)">
-          Estudiantes
-        </button>
+        <button class="active" onclick="show('estudiantes', this)">Estudiantes</button>
         <button onclick="show('solicitudes', this)">Solicitudes</button>
         <button onclick="show('tutores', this)">Tutores</button>
         <button onclick="show('tutorias', this)">Tutorías</button>
@@ -54,6 +46,7 @@
                 <th>APELLIDO</th>
                 <th>CARRERA</th>
                 <th>EMAIL</th>
+                <th>ACCIONES</th>
               </tr>
             </thead>
             <tbody id="tabla-estudiantes"></tbody>
@@ -69,12 +62,13 @@
           <table>
             <thead>
               <tr>
-                <th>ID Solicitud</th>
-                <th>ID Estudiante</th>
-                <th>Asignatura</th>
-                <th>Descripción del Problema</th>
-                <th>Fecha Solicitud</th>
-                <th>Estado</th>
+                <th>ID_SOLICITUD</th>
+                <th>ID_ESTUDIANTE</th>
+                <th>ASIGNATURA</th>
+                <th>DESCRIPCION DEL PROBLEMA</th>
+                <th>FECHA DE SOLICITUD</th>
+                <th>ESTADO</th>
+                <th>ACCIONES</th>
               </tr>
             </thead>
             <tbody id="tabla-solicitudes"></tbody>
@@ -90,11 +84,12 @@
           <table>
             <thead>
               <tr>
-                <th>ID Tutor</th>
-                <th>Nombre</th>
-                <th>Apellido</th>
-                <th>Especialidad</th>
-                <th>Email</th>
+                <th>ID_TUTOR</th>
+                <th>NOMBRE</th>
+                <th>APELLIDO</th>
+                <th>ESPECIALIDAD</th>
+                <th>EMAIL</th>
+                <th>ACCIONES</th>
               </tr>
             </thead>
             <tbody id="tabla-tutores"></tbody>
@@ -110,13 +105,14 @@
           <table>
             <thead>
               <tr>
-                <th>ID Tutoría</th>
-                <th>ID Solicitud</th>
-                <th>ID Tutor</th>
-                <th>Fecha / Hora</th>
-                <th>Aula / Link</th>
-                <th>Estado</th>
-                <th>Observaciones</th>
+                <th>ID TUTORIA</th>
+                <th>ID SOLICITUD</th>
+                <th>ID TUTOR</th>
+                <th>FECHA / HORA</th>
+                <th>AULA / LINK</th>
+                <th>ESTADO</th>
+                <th>OBSERVACIONES</th>
+                <th>ACCIONES</th>
               </tr>
             </thead>
             <tbody id="tabla-tutorias"></tbody>
