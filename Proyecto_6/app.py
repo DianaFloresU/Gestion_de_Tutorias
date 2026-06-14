@@ -287,24 +287,13 @@ def asignaturas_mas_solicitadas():
 @app.route('/tutorias_por_fecha', methods=['GET'])
 @jwt_required()
 def tutorias_por_fecha():
-    correo_estudiante = get_jwt_identity()
     fecha_inicio = request.args.get('fecha_inicio')
     fecha_fin = request.args.get('fecha_fin')
-
+    
     if not fecha_inicio or not fecha_fin:
         return jsonify({"msg": "Debe proporcionar fecha_inicio y fecha_fin en formato YYYY-MM-DD"}), 400
-
+    
     cursor = mysql.connection.cursor()
-
-    cursor.execute("SELECT id_estudiante FROM estudiantes WHERE email = %s", (correo_estudiante,))
-    estudiante = cursor.fetchone()
-
-    if not estudiante:
-        cursor.close()
-        return jsonify({"msg": "Estudiante no encontrado"}), 404
-
-    id_estudiante = estudiante[0]
-
     cursor.execute("""
         SELECT t.id_tutoria, s.asignatura,
                CONCAT(e.nombre, ' ', e.apellido) AS estudiante,
@@ -315,12 +304,11 @@ def tutorias_por_fecha():
         JOIN estudiantes e ON s.id_estudiante = e.id_estudiante
         JOIN tutores tu ON t.id_tutor = tu.id_tutor
         WHERE DATE(t.fecha_hora) BETWEEN %s AND %s
-          AND s.id_estudiante = %s
         ORDER BY t.fecha_hora DESC """,
-    (fecha_inicio, fecha_fin, id_estudiante))
+    (fecha_inicio, fecha_fin))
     rows = cursor.fetchall()
     cursor.close()
-
+    
     resultado = []
     for row in rows:
         resultado.append({
@@ -332,7 +320,6 @@ def tutorias_por_fecha():
             'estado': row[5]
         })
     return jsonify(resultado), 200
-    
 
 @app.route('/api/reportes/alumnos_demandantes', methods=['GET'])
 @jwt_required()
