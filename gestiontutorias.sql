@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jun 09, 2026 at 04:55 PM
+-- Generation Time: Jun 14, 2026 at 02:24 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -47,7 +47,17 @@ INSERT INTO `estudiantes` (`id_estudiante`, `nombre`, `apellido`, `carrera`, `em
 (5, 'Mateo', 'Aparicio', 'Sistemas', 'mateo.a@univ.edu'),
 (6, 'Valeria', 'Quispe', 'Informática', 'valeria.q@univ.edu'),
 (7, 'Diego', 'Roca', 'Redes', 'diego.r@univ.edu'),
-(8, 'Elena', 'Blanco', 'Telecomunicaciones', 'elena.b@univ.edu');
+(8, 'Elena', 'Blanco', 'Telecomunicaciones', 'elena.b@univ.edu'),
+(9, 'Ana', 'Martínez', 'Informática', 'ana.martinez@universidad.edu'),
+(10, 'Carlos', 'López', 'Sistemas', 'carlos.lopez@universidad.edu'),
+(11, 'Sharon', 'Flores', 'Telecomunicaciones', 'sharon.flores@universidad.edu'),
+(12, 'Bruno', 'Díaz', 'Sistemas', 'bruno.diaz@universidad.edu'),
+(13, 'Elena', 'Gómez', 'Informática', 'elena.gomez@universidad.edu'),
+(14, 'Fernando', 'Torres', 'Telecomunicaciones', 'fernando.torres@universidad.edu'),
+(15, 'Gabriela', 'Ríos', 'Redes', 'gabriela.rios@universidad.edu'),
+(16, 'Hugo', 'Mendoza', 'Informática', 'hugo.mendoza@universidad.edu'),
+(17, 'Isabel', 'Castro', 'Sistemas', 'isabel.castro@universidad.edu'),
+(18, 'Jorge', 'Ortiz', 'Informática', 'jorge.ortiz@universidad.edu');
 
 -- --------------------------------------------------------
 
@@ -76,7 +86,15 @@ INSERT INTO `solicitudes` (`id_solicitud`, `id_estudiante`, `asignatura`, `descr
 (5, 5, 'Estructuras de Datos', 'Concepto de árboles binarios de búsqueda.', '2026-06-04', 'Asignada'),
 (6, 6, 'Base de Datos I', 'No logro optimizar consultas con INNER JOIN complejos.', '2026-06-05', 'Asignada'),
 (7, 7, 'Sistemas Operativos', 'Dudas sobre gestión de memoria y paginación.', '2026-06-06', 'Pendiente'),
-(8, 8, 'Programación Web', 'Dudas con el manejo de estados asíncronos.', '2026-06-07', 'Rechazada');
+(8, 8, 'Programación Web', 'Dudas con el manejo de estados asíncronos.', '2026-06-07', 'Rechazada'),
+(9, 9, 'Base de Datos I', 'Dudas con dependencias transitivas y la tercera forma normal.', '2026-06-11', 'Asignada'),
+(10, 10, 'Programación II', 'Errores de segmentación al balancear árboles AVL de forma recursiva.', '2026-06-12', 'Asignada'),
+(11, 11, 'Cálculo I', 'Optimización matemática aplicando los teoremas de derivadas.', '2026-06-12', 'Pendiente'),
+(12, 12, 'Sistemas Operativos', 'Problemas de concurrencia y bloqueos mutuos con semáforos.', '2026-06-13', 'Asignada'),
+(13, 13, 'Programación Web', 'Dificultades integrando el paso de propiedades asíncronas.', '2026-06-13', 'Pendiente'),
+(14, 14, 'Redes de Computadoras', 'Diseño e implementación de direccionamiento con máscaras VLSM.', '2026-06-14', 'Asignada'),
+(15, 9, 'Base de Datos I', 'Tengo problemas para entender las dependencias funcionales y la normalización de tablas.', '2026-06-14', 'Pendiente'),
+(16, 9, 'Programación II', 'Dificultades con el recorrido en orden de árboles binarios.', '2026-06-14', 'Pendiente');
 
 -- --------------------------------------------------------
 
@@ -104,7 +122,18 @@ INSERT INTO `tutores` (`id_tutor`, `nombre`, `apellido`, `especialidad`, `email`
 (5, 'Eduardo', 'Gómez', 'Cálculo y Álgebra', 'eduardo.g@tutor.univ.edu'),
 (6, 'Fabiola', 'Rojas', 'Ingeniería de Software', 'fabiola.r@tutor.univ.edu'),
 (7, 'Gustavo', 'Marín', 'Sistemas Operativos', 'gustavo.m@tutor.univ.edu'),
-(8, 'Helena', 'Arce', 'Inteligencia Artificial', 'helena.a@tutor.univ.edu');
+(8, 'Helena', 'Arce', 'Inteligencia Artificial', 'helena.a@tutor.univ.edu'),
+(9, 'Diana', 'Flores', 'Diseño Grafico', 'diana@tutor.edu'),
+(10, 'Beatriz', 'Luna', 'Programación Web', 'beatriz.luna@universidad.edu'),
+(11, 'Ricardo', 'Sánchez', 'Cálculo y Álgebra', 'ricardo.sanchez@universidad.edu'),
+(12, 'Claudia', 'Morales', 'Estructuras de Datos', 'claudia.morales@universidad.edu'),
+(13, 'Sergio', 'Paz', 'Sistemas Operativos', 'sergio.paz@universidad.edu'),
+(14, 'Martha', 'Herrera', 'Base de Datos', 'martha.herrera@universidad.edu'),
+(15, 'David', 'Castro', 'Base de Datos', 'david.castro@universidad.edu'),
+(16, 'Laura', 'Vargas', 'Redes y Conectividad', 'laura.vargas@universidad.edu'),
+(17, 'Manuel', 'Rojas', 'Programación Web', 'manuel.rojas@universidad.edu'),
+(18, 'Patricia', 'Peña', 'Ingeniería de Software', 'patricia.pena@universidad.edu'),
+(19, 'Oscar', 'Benítez', 'Cálculo y Álgebra', 'oscar.benitez@universidad.edu');
 
 -- --------------------------------------------------------
 
@@ -134,7 +163,13 @@ INSERT INTO `tutorias` (`id_tutoria`, `id_solicitud`, `id_tutor`, `fecha_hora`, 
 (5, 5, 4, '2026-06-08 09:00:00', 'Laboratorio de Cómputo 1', 'Realizada', 'Implementación de inserción en árboles AVL.'),
 (6, 6, 1, '2026-06-10 15:00:00', 'Aula Virtual A', 'Programada', 'Pendiente por realizar esta semana.'),
 (7, 1, 1, '2026-06-05 14:30:00', 'Aula Virtual A', 'Realizada', 'Segunda sesión de refuerzo solicitada por el tutor.'),
-(8, 3, 5, '2026-06-06 16:00:00', 'Cubículo de Tutorías 3', 'Cancelada', 'El estudiante tuvo un cruce de horario con un examen.');
+(8, 3, 5, '2026-06-06 16:00:00', 'Cubículo de Tutorías 3', 'Cancelada', 'El estudiante tuvo un cruce de horario con un examen.'),
+(9, 9, 14, '2026-06-16 10:00:00', 'Aula Virtual B', 'Programada', 'Traer el diagrama entidad-relación avanzado.'),
+(10, 10, 10, '2026-06-17 15:30:00', 'Cubículo de Tutorías 3', 'Programada', 'Revisión paso a paso del código fuente en C++.'),
+(11, 12, 11, '2026-06-18 09:00:00', 'Laboratorio de Cómputo 1', 'Programada', 'Simulación práctica de procesos concurrentes.'),
+(12, 14, 12, '2026-06-19 11:00:00', 'Aula Virtual C', 'Cancelada', 'Cancelada por problemas de conexión de la tutora.'),
+(13, 14, 12, '2026-06-20 11:00:00', 'Aula Virtual C', 'Programada', 'Sesión de reprogramación para VLSM.'),
+(14, 9, 14, '2026-06-14 14:00:00', 'Aula Virtual B', 'Realizada', 'Se dominó exitosamente la descomposición de tablas.');
 
 --
 -- Indexes for dumped tables
@@ -177,25 +212,25 @@ ALTER TABLE `tutorias`
 -- AUTO_INCREMENT for table `estudiantes`
 --
 ALTER TABLE `estudiantes`
-  MODIFY `id_estudiante` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id_estudiante` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
 
 --
 -- AUTO_INCREMENT for table `solicitudes`
 --
 ALTER TABLE `solicitudes`
-  MODIFY `id_solicitud` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id_solicitud` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- AUTO_INCREMENT for table `tutores`
 --
 ALTER TABLE `tutores`
-  MODIFY `id_tutor` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id_tutor` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
 
 --
 -- AUTO_INCREMENT for table `tutorias`
 --
 ALTER TABLE `tutorias`
-  MODIFY `id_tutoria` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id_tutoria` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- Constraints for dumped tables

@@ -55,13 +55,13 @@ def mis_tutorias():
     id_estudiante = estudiante[0]
 
     sql = """
-        SELECT t.id_tutoria, s.asignatura, t.fecha_hora, t.aula_o_link, t.estado_tutoria 
-        FROM tutorias t
-        INNER JOIN solicitudes s ON t.id_solicitud = s.id_solicitud
+        SELECT t.id_tutoria,s.id_solicitud, s.asignatura, t.fecha_hora, t.aula_o_link, s.estado AS estado_solicitud, t.estado_tutoria 
+        FROM solicitudes s
+        LEFT JOIN tutorias t ON s.id_solicitud = t.id_solicitud
         WHERE s.id_estudiante = %s
     """
     cur.execute(sql, (id_estudiante,))
-    columnas = ['id_tutoria', 'asignatura', 'fecha_hora', 'aula_o_link', 'estado_tutoria']
+    columnas = ['id_tutoria', 'id_solicitud', 'asignatura', 'fecha_hora', 'aula_o_link', 'estado_solicitud', 'estado_tutoria']
     resultado = [dict(zip(columnas, fila)) for fila in cur.fetchall()]  
     cur.close()
     return jsonify(resultado), 200
@@ -175,11 +175,22 @@ def mostrar_solicitudes():
 def agregar_solicitud():
     data = request.get_json()
     cur = mysql.connection.cursor()
+    descripcion_base = data['descripcion_problema', '']
+    fecha_inicio = data.get('fecha_inicio')
+    fecha_fin = data.get('fecha_fin')
+
+    fecha_actual = datetime.now().strftime("%Y-%m-%d")
+    if fecha_inicio and fecha_fin:
+        nota_dispo= f"\n\n[Nota de disponibilidad]: Solicito amablemente que la sesión pueda ser programada entre las siguientes fechas: desde el {fecha_inicio} hasta el {fecha_fin}."
+        descripcion_final= f"{descripcion_base}{nota_dispo}"
+    else:
+        descripcion_final= descripcion_base
+    
     cur.execute("INSERT INTO Solicitudes (id_estudiante, asignatura, descripcion_problema, fecha_solicitud, estado) VALUES (%s, %s, %s, %s, %s)",
-                (data['id_estudiante'], data['asignatura'], data['descripcion_problema'], data['fecha_solicitud'], data['estado']))
+                (data['id_estudiante'], data['asignatura'], descripcion_final, fecha_actual, data['estado']))
     mysql.connection.commit()
     cur.close()
-    return jsonify({"msg": "Solicitud agregada"}), 201
+    return jsonify({"msg": "Solicitud agregada exitosamente"}), 201
 
 # Endpoint para modificar solicitud, requiere autenticación JWT
 
@@ -192,7 +203,7 @@ def modificar_solicitud(id):
                 (data['id_estudiante'], data['asignatura'], data['descripcion_problema'], data['fecha_solicitud'], data['estado'], id))
     mysql.connection.commit()
     cur.close()
-    return jsonify({"msg": "Solicitud modificada"}), 200
+    return jsonify({"msg": "Solicitud modificada exitosamente"}), 200
 
 # Endpoint para eliminar solicitud, requiere autenticación JWT
 
@@ -203,7 +214,7 @@ def eliminar_solicitud(id):
     cur.execute("DELETE FROM Solicitudes WHERE id_solicitud = %s", (id,))
     mysql.connection.commit()
     cur.close()
-    return jsonify({"msg": "Solicitud eliminada"}), 200
+    return jsonify({"msg": "Solicitud eliminada exitosamente"}), 200
 
 # Endpoint para mostrar tutorías
 

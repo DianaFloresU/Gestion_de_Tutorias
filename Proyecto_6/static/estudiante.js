@@ -37,34 +37,46 @@ function cargarMisTutorias() {
         tabla.innerHTML = "";
 
         data.forEach(tutoria => {
-            const fechaHora = new Date(tutoria.fecha_hora);
-            const opcionesFecha= { 
-                weekday: 'long',
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-            };
-            let fechaEsp= fechaHora.toLocaleDateString('es-ES', opcionesFecha);
-            fechaEsp = fechaEsp.charAt(0).toUpperCase() + fechaEsp.slice(1);
-            
-            let claseBadge = "pendiente"; 
-            const estado = tutoria.estado_tutoria.toLowerCase();
-
-            if (estado === "programada" || estado === "realizada") {
-                claseBadge = "programada";
-            } else if (estado === "cancelada") {
-                claseBadge = "cancelada";
+            let fechaEsp = "Sin fecha asignada aun";
+            if(tutoria.fecha_hora) {
+                const fechaHora = new Date(tutoria.fecha_hora);
+                const opcionesFecha= { 
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                };
+                fechaEsp= fechaHora.toLocaleDateString('es-ES', opcionesFecha);
+                fechaEsp = fechaEsp.charAt(0).toUpperCase() + fechaEsp.slice(1);
             }
+
+            let claseBadge = "pendiente"; 
+            let textoEstado = "";
+
+            if(tutoria.id_tutoria === null) {
+                claseBadge = "pendiente";
+                textoEstado = tutoria.estado_solicitud ? tutoria.estado_solicitud.toUpperCase() : "PENDIENTE";
+            } else {
+                const estado = tutoria.estado_tutoria ? tutoria.estado_tutoria.toLowerCase() : "";
+                textoEstado = tutoria.estado_tutoria;
+                if (estado === "programada" || estado === "realizada") {
+                    claseBadge = "programada";
+                }else if (estado === "cancelada") {
+                    claseBadge = "cancelada";
+                }
+            }
+
+            const lugarTexto = tutoria.aula_o_link ? tutoria.aula_o_link : "Por asignar";
 
             tabla.innerHTML += `
                 <tr>
-                    <td>${tutoria.id_tutoria}</td>
+                    <td>${tutoria.id_solicitud}</td>
                     <td>Solicitud #${tutoria.asignatura}</td>
                     <td>${fechaEsp}</td>
-                    <td>${tutoria.aula_o_link}</td>
-                    <td><span class="badge ${claseBadge}">${tutoria.estado_tutoria}</span></td>
+                    <td>${lugarTexto}</td>
+                    <td><span class="badge ${claseBadge}">${textoEstado}</span></td>
                 </tr>`;
         });
     })
@@ -77,13 +89,19 @@ function enviarSolicitud(event) {
     const asignatura = document.getElementById("asignatura").value;
     const descripcion = document.getElementById("descripcion").value;
     const fechaInicio = document.getElementById("fecha-inicio").value;
-
+    const fechaFin = document.getElementById("fecha-fin").value;
+    
+    const hoy = new Date();
+    const fechaHoy = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, '0')}-${String(hoy.getDate()).padStart(2, '0')}`;
+    
     const datosSolicitud = {
         id_estudiante: usuarioId, // <-- Esta línea se aumentó
         asignatura: asignatura,
         descripcion_problema: descripcion,
-        fecha_solicitud: fechaInicio,
-        estado: "Pendiente" 
+        fecha_solicitud: fechaHoy,
+        estado: "Pendiente",
+        fecha_inicio: fechaInicio,
+        fecha_fin: fechaFin
     };
 
     fetch("http://127.0.0.1:5000/agregar_solicitud", {
@@ -96,7 +114,7 @@ function enviarSolicitud(event) {
     })
     .then(res => res.json())
     .then(data => {
-        alert("¡Tu solicitud de tutoría ha sido registrada en la base de datos!");
+        alert("¡Tu solicitud de tutoría ha sido registrada correctamente!");
         document.getElementById("form-solicitud").reset();
         
         const botonTutorias = document.querySelectorAll("nav button")[1];
