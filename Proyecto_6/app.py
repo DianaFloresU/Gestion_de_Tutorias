@@ -1,16 +1,26 @@
+import mysql.connector as mysql_backend
 from flask import Flask, jsonify, request, render_template
 from flask_mysqldb import MySQL
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 from datetime import timedelta
 from datetime import datetime, date
+from flask import current_app
 
 app = Flask(__name__)
+
+# CORREGIDO: Usamos el nuevo alias para que no choque con la variable de abajo
+db = mysql_backend.connect(
+    host="localhost",
+    user="root",
+    password="",
+    database="gestiontutorias"
+)
 
 # Configuración de la Base de Datos
 app.config['MYSQL_HOST'] = 'localhost'
 app.config['MYSQL_USER'] = 'root'       
 app.config['MYSQL_PASSWORD'] = ''      
-app.config['MYSQL_DB'] = 'gestionTutorias'
+app.config['MYSQL_DB'] = 'gestiontutorias'
 
 # Configuración de JWT
 app.config['JWT_SECRET_KEY'] = '12345'
@@ -175,7 +185,7 @@ def mostrar_solicitudes():
 def agregar_solicitud():
     data = request.get_json()
     cur = mysql.connection.cursor()
-    descripcion_base = data['descripcion_problema', '']
+    descripcion_base = data.get['descripcion_problema', '']
     fecha_inicio = data.get('fecha_inicio')
     fecha_fin = data.get('fecha_fin')
 
@@ -497,7 +507,137 @@ def tutorias_tutor():
     cursor.close()
     return jsonify(resultados), 200
 
+@app.route('/registrar_bitacora', methods=['POST'])
+@jwt_required()
+def registrar_bitacora():
+    datos = request.get_json()
+    id_tutoria = datos.get('id_tutoria')
+    fecha = datos.get('fecha')
+    hora = datos.get('hora')
+    temas = datos.get('temas_abordados')
+    observaciones = datos.get('observaciones_rendimiento')
+    tareas = datos.get('tareas_asignadas')
+
+    if not id_tutoria or not fecha or not hora or not temas:
+        return jsonify({"msg": "Faltan datos obligatorios para la bitácora"}), 400
+
+    try:
+        cur = mysql.connection.cursor()
+        cur.execute("""
+            INSERT INTO bitacora_sesiones (id_tutoria, fecha, hora, temas_abordados, observaciones_rendimiento, tareas_asignadas)
+            VALUES (%s, %s, %s, %s, %s, %s)
+        """, (id_tutoria, fecha, hora, temas, observaciones, tareas))
+        mysql.connection.commit()
+        cur.close()
+        return jsonify({"msg": "Bitácora de sesión registrada correctamente"}), 201
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 
+@app.route('/registrar_asistencia', methods=['POST'])
+@jwt_required()
+def registrar_asistencia():
+    datos = request.get_json()
+    id_tutoria = datos.get('id_tutoria')
+    id_estudiante = datos.get('id_estudiante')
+    asistio = datos.get('asistio')
+
+    if id_tutoria is None or id_estudiante is None or asistio is None:
+        return jsonify({"msg": "Faltan datos obligatorios para la asistencia"}), 400
+
+    try:
+        cur = mysql.connection.cursor()
+        cur.execute("""
+            INSERT INTO control_asistencia (id_tutoria, id_estudiante, asistio)
+            VALUES (%s, %s, %s)
+        """, (id_tutoria, id_estudiante, asistio))
+        mysql.connection.commit()
+        cur.close()
+        return jsonify({"msg": "Asistencia registrada correctamente"}), 201
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/bitacoras_tutor', methods=['GET'])
+@jwt_required()
+def obtener_bitacoras_tutor():
+    try:
+        cursor = db.cursor(dictionary=True)
+        
+        consulta = """
+            SELECT b.id_tutoria, b.fecha, b.hora, b.temas_abordados, 
+                   b.observaciones_rendimiento, b.tareas_asignadas
+            FROM bitacora_sesiones b
+            JOIN tutorias t ON b.id_tutoria = t.id_tutoria
+            ORDER BY b.fecha DESC, b.hora DESC
+        """
+        cursor.execute(consulta)
+        historial = cursor.fetchall()
+        cursor.close()
+        
+        for registro in historial:
+            registro['id_tutoria'] = int(registro['id_tutoria'])
+            if registro['fecha']:
+                registro['fecha'] = str(registro['fecha'])
+            if registro['hora']:
+                registro['hora'] = str(registro['hora'])
+            registro['temas_abordados'] = str(registro['temas_abordados'] or '')
+            registro['observaciones_rendimiento'] = str(registro['observaciones_rendimiento'] or '')
+            registro['tareas_asignadas'] = str(registro['tareas_asignadas'] or '')
+                
+        return jsonify(historial), 200
+    except Exception as e:
+        print("FALLO CRÍTICO EN BITACORAS:", str(e))
+        return jsonify([]), 200
+
+@app.route('/asistencias_tutor', methods=['GET'])
+@jwt_required()
+def obtener_asistencias_tutor():
+    try:
+        cursor = db.cursor(dictionary=True)
+        
+        consulta = """
+            SELECT c.id_tutoria, c.id_estudiante, c.asistio
+            FROM control_asistencia c
+            JOIN tutorias t ON c.id_tutoria = t.id_tutoria
+            ORDER BY c.id_tutoria DESC
+        """
+        cursor.execute(consulta)
+        historial = cursor.fetchall()
+        
+        for registro in historial:
+            registro['id_tutoria'] = int(registro['id_tutoria'])
+            registro['id_estudiante'] = int(registro['id_estudiante'])
+            registro['asistio'] = str(registro['asistio'])
+            
+            try:
+                cursor.execute("SELECT nombre FROM estudiantes WHERE id_estudiante = %s", (registro['id_estudiante'],))
+                est = cursor.fetchone()
+                if est:
+                    registro['estudiante'] = est['nombre']
+                else:
+                    cursor.execute("SELECT nombre FROM estudiantes WHERE id_usuario = %s", (registro['id_estudiante'],))
+                    est_alt = cursor.fetchone()
+                    registro['estudiante'] = est_alt['nombre'] if est_alt else f"Estudiante {registro['id_estudiante']}"
+            except:
+                registro['estudiante'] = f"Estudiante {registro['id_estudiante']}"
+                
+            try:
+                cursor.execute("SELECT id_solicitud FROM tutorias WHERE id_tutoria = %s", (registro['id_tutoria'],))
+                tut = cursor.fetchone()
+                if tut and tut['id_solicitud']:
+                    cursor.execute("SELECT asignatura FROM solicitudes WHERE id_solicitud = %s", (tut['id_solicitud'],))
+                    sol = cursor.fetchone()
+                    registro['asignatura'] = sol['asignatura'] if sol else "Tutoría"
+                else:
+                    registro['asignatura'] = "Tutoría"
+            except:
+                registro['asignatura'] = "Tutoría"
+                
+        cursor.close()
+        return jsonify(historial), 200
+    except Exception as e:
+        print("FALLO CRÍTICO EN ASISTENCIAS:", str(e))
+        return jsonify([]), 200
+    
 if __name__ == '__main__':
     app.run(debug=True)
