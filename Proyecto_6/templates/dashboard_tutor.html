@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel de Control - Tutor</title>
+    <title>Sistema de Gestión de Tutorías - Panel de Control - Tutor</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -142,6 +142,24 @@
         tr:hover {
             background-color: rgba(58, 80, 107, 0.2);
         }
+        .badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .badge.pendiente {
+            background-color: #ffb703;
+            color: #023047;
+        }
+
+        .badge.programada {
+            background-color: #2a9d8f;
+            color: #ffffff;
+        }
     </style>
     <script>
         if (!localStorage.getItem("token") || localStorage.getItem("rol") !== "tutor") {
@@ -152,7 +170,7 @@
 <body>
 
     <header>
-        <h2>Panel de Acompañamiento Académico - Tutores</h2>
+        <h2>Sistema de Gestión de Tutorías - Tutores</h2>
         <div>
             <span id="nombre-usuario" style="font-weight: 600; margin-right: 20px; color: #00b4d8;">Tutor</span>
             <button class="btn-logout" onclick="cerrarSesion()">Cerrar Sesión</button>
@@ -222,6 +240,11 @@
                 
                 document.getElementById(idSeccion).classList.add("active");
                 boton.classList.add("active");
+            }
+
+            function cerrarSesion() {
+                localStorage.clear();
+                window.location.replace("/");
             }
 
             function cargarSolicitudesEstudiantes() {

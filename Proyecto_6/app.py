@@ -175,7 +175,7 @@ def mostrar_solicitudes():
 def agregar_solicitud():
     data = request.get_json()
     cur = mysql.connection.cursor()
-    descripcion_base = data['descripcion_problema', '']
+    descripcion_base = data.get('descripcion_problema', '')
     fecha_inicio = data.get('fecha_inicio')
     fecha_fin = data.get('fecha_fin')
 
@@ -186,6 +186,10 @@ def agregar_solicitud():
     else:
         descripcion_final= descripcion_base
     
+    if 'id_estudiante' not in data or 'asignatura' not in data or 'estado' not in data:
+        cur.close()
+        return jsonify({"msg": "Faltan campos obligatorios en la solicitud"}), 400
+
     cur.execute("INSERT INTO Solicitudes (id_estudiante, asignatura, descripcion_problema, fecha_solicitud, estado) VALUES (%s, %s, %s, %s, %s)",
                 (data['id_estudiante'], data['asignatura'], descripcion_final, fecha_actual, data['estado']))
     mysql.connection.commit()
