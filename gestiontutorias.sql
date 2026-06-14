@@ -2,10 +2,10 @@
 -- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- Host: 127.0.0.1
--- Generation Time: Jun 14, 2026 at 02:24 PM
--- Server version: 10.4.32-MariaDB
--- PHP Version: 8.2.12
+-- Servidor: 127.0.0.1
+-- Tiempo de generación: 15-06-2026 a las 00:02:29
+-- Versión del servidor: 10.4.32-MariaDB
+-- Versión de PHP: 8.0.30
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -18,13 +18,60 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `gestiontutorias`
+-- Base de datos: `gestiontutorias`
 --
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `estudiantes`
+-- Estructura de tabla para la tabla `bitacora_sesiones`
+--
+
+CREATE TABLE `bitacora_sesiones` (
+  `id_bitacora` int(11) NOT NULL,
+  `id_tutoria` int(11) NOT NULL,
+  `fecha` date NOT NULL,
+  `hora` time NOT NULL,
+  `temas_abordados` text NOT NULL,
+  `observaciones_rendimiento` text DEFAULT NULL,
+  `tareas_asignadas` text DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `bitacora_sesiones`
+--
+
+INSERT INTO `bitacora_sesiones` (`id_bitacora`, `id_tutoria`, `fecha`, `hora`, `temas_abordados`, `observaciones_rendimiento`, `tareas_asignadas`) VALUES
+(5, 1, '2026-06-10', '14:30:00', 'Revisión de consultas complejas, INNER JOIN, LEFT JOIN y subconsultas.', 'El estudiante comprende la lógica pero se confunde al estructurar subconsultas.', 'Resolver la guía de ejercicios prácticos.'),
+(6, 2, '2026-06-11', '16:00:00', 'Estructuras de control repetitivas y manejo de arreglos.', 'Muestra buen avance, logró resolver los problemas planteados.', 'Implementar dos algoritmos de ordenamiento.');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `control_asistencia`
+--
+
+CREATE TABLE `control_asistencia` (
+  `id_asistencia` int(11) NOT NULL,
+  `id_tutoria` int(11) NOT NULL,
+  `id_estudiante` int(11) NOT NULL,
+  `asistio` varchar(20) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `control_asistencia`
+--
+
+INSERT INTO `control_asistencia` (`id_asistencia`, `id_tutoria`, `id_estudiante`, `asistio`) VALUES
+(9, 1, 3, 'Asistió'),
+(10, 2, 4, 'Asistió'),
+(11, 1, 5, 'Falta'),
+(12, 2, 3, 'Justificado');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `estudiantes`
 --
 
 CREATE TABLE `estudiantes` (
@@ -36,7 +83,7 @@ CREATE TABLE `estudiantes` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `estudiantes`
+-- Volcado de datos para la tabla `estudiantes`
 --
 
 INSERT INTO `estudiantes` (`id_estudiante`, `nombre`, `apellido`, `carrera`, `email`) VALUES
@@ -47,22 +94,12 @@ INSERT INTO `estudiantes` (`id_estudiante`, `nombre`, `apellido`, `carrera`, `em
 (5, 'Mateo', 'Aparicio', 'Sistemas', 'mateo.a@univ.edu'),
 (6, 'Valeria', 'Quispe', 'Informática', 'valeria.q@univ.edu'),
 (7, 'Diego', 'Roca', 'Redes', 'diego.r@univ.edu'),
-(8, 'Elena', 'Blanco', 'Telecomunicaciones', 'elena.b@univ.edu'),
-(9, 'Ana', 'Martínez', 'Informática', 'ana.martinez@universidad.edu'),
-(10, 'Carlos', 'López', 'Sistemas', 'carlos.lopez@universidad.edu'),
-(11, 'Sharon', 'Flores', 'Telecomunicaciones', 'sharon.flores@universidad.edu'),
-(12, 'Bruno', 'Díaz', 'Sistemas', 'bruno.diaz@universidad.edu'),
-(13, 'Elena', 'Gómez', 'Informática', 'elena.gomez@universidad.edu'),
-(14, 'Fernando', 'Torres', 'Telecomunicaciones', 'fernando.torres@universidad.edu'),
-(15, 'Gabriela', 'Ríos', 'Redes', 'gabriela.rios@universidad.edu'),
-(16, 'Hugo', 'Mendoza', 'Informática', 'hugo.mendoza@universidad.edu'),
-(17, 'Isabel', 'Castro', 'Sistemas', 'isabel.castro@universidad.edu'),
-(18, 'Jorge', 'Ortiz', 'Informática', 'jorge.ortiz@universidad.edu');
+(8, 'Elena', 'Blanco', 'Telecomunicaciones', 'elena.b@univ.edu');
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `solicitudes`
+-- Estructura de tabla para la tabla `solicitudes`
 --
 
 CREATE TABLE `solicitudes` (
@@ -75,7 +112,7 @@ CREATE TABLE `solicitudes` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `solicitudes`
+-- Volcado de datos para la tabla `solicitudes`
 --
 
 INSERT INTO `solicitudes` (`id_solicitud`, `id_estudiante`, `asignatura`, `descripcion_problema`, `fecha_solicitud`, `estado`) VALUES
@@ -86,20 +123,12 @@ INSERT INTO `solicitudes` (`id_solicitud`, `id_estudiante`, `asignatura`, `descr
 (5, 5, 'Estructuras de Datos', 'Concepto de árboles binarios de búsqueda.', '2026-06-04', 'Asignada'),
 (6, 6, 'Base de Datos I', 'No logro optimizar consultas con INNER JOIN complejos.', '2026-06-05', 'Asignada'),
 (7, 7, 'Sistemas Operativos', 'Dudas sobre gestión de memoria y paginación.', '2026-06-06', 'Pendiente'),
-(8, 8, 'Programación Web', 'Dudas con el manejo de estados asíncronos.', '2026-06-07', 'Rechazada'),
-(9, 9, 'Base de Datos I', 'Dudas con dependencias transitivas y la tercera forma normal.', '2026-06-11', 'Asignada'),
-(10, 10, 'Programación II', 'Errores de segmentación al balancear árboles AVL de forma recursiva.', '2026-06-12', 'Asignada'),
-(11, 11, 'Cálculo I', 'Optimización matemática aplicando los teoremas de derivadas.', '2026-06-12', 'Pendiente'),
-(12, 12, 'Sistemas Operativos', 'Problemas de concurrencia y bloqueos mutuos con semáforos.', '2026-06-13', 'Asignada'),
-(13, 13, 'Programación Web', 'Dificultades integrando el paso de propiedades asíncronas.', '2026-06-13', 'Pendiente'),
-(14, 14, 'Redes de Computadoras', 'Diseño e implementación de direccionamiento con máscaras VLSM.', '2026-06-14', 'Asignada'),
-(15, 9, 'Base de Datos I', 'Tengo problemas para entender las dependencias funcionales y la normalización de tablas.', '2026-06-14', 'Pendiente'),
-(16, 9, 'Programación II', 'Dificultades con el recorrido en orden de árboles binarios.', '2026-06-14', 'Pendiente');
+(8, 8, 'Programación Web', 'Dudas con el manejo de estados asíncronos.', '2026-06-07', 'Rechazada');
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `tutores`
+-- Estructura de tabla para la tabla `tutores`
 --
 
 CREATE TABLE `tutores` (
@@ -111,7 +140,7 @@ CREATE TABLE `tutores` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `tutores`
+-- Volcado de datos para la tabla `tutores`
 --
 
 INSERT INTO `tutores` (`id_tutor`, `nombre`, `apellido`, `especialidad`, `email`) VALUES
@@ -122,23 +151,12 @@ INSERT INTO `tutores` (`id_tutor`, `nombre`, `apellido`, `especialidad`, `email`
 (5, 'Eduardo', 'Gómez', 'Cálculo y Álgebra', 'eduardo.g@tutor.univ.edu'),
 (6, 'Fabiola', 'Rojas', 'Ingeniería de Software', 'fabiola.r@tutor.univ.edu'),
 (7, 'Gustavo', 'Marín', 'Sistemas Operativos', 'gustavo.m@tutor.univ.edu'),
-(8, 'Helena', 'Arce', 'Inteligencia Artificial', 'helena.a@tutor.univ.edu'),
-(9, 'Diana', 'Flores', 'Diseño Grafico', 'diana@tutor.edu'),
-(10, 'Beatriz', 'Luna', 'Programación Web', 'beatriz.luna@universidad.edu'),
-(11, 'Ricardo', 'Sánchez', 'Cálculo y Álgebra', 'ricardo.sanchez@universidad.edu'),
-(12, 'Claudia', 'Morales', 'Estructuras de Datos', 'claudia.morales@universidad.edu'),
-(13, 'Sergio', 'Paz', 'Sistemas Operativos', 'sergio.paz@universidad.edu'),
-(14, 'Martha', 'Herrera', 'Base de Datos', 'martha.herrera@universidad.edu'),
-(15, 'David', 'Castro', 'Base de Datos', 'david.castro@universidad.edu'),
-(16, 'Laura', 'Vargas', 'Redes y Conectividad', 'laura.vargas@universidad.edu'),
-(17, 'Manuel', 'Rojas', 'Programación Web', 'manuel.rojas@universidad.edu'),
-(18, 'Patricia', 'Peña', 'Ingeniería de Software', 'patricia.pena@universidad.edu'),
-(19, 'Oscar', 'Benítez', 'Cálculo y Álgebra', 'oscar.benitez@universidad.edu');
+(8, 'Helena', 'Arce', 'Inteligencia Artificial', 'helena.a@tutor.univ.edu');
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `tutorias`
+-- Estructura de tabla para la tabla `tutorias`
 --
 
 CREATE TABLE `tutorias` (
@@ -152,52 +170,61 @@ CREATE TABLE `tutorias` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `tutorias`
+-- Volcado de datos para la tabla `tutorias`
 --
 
 INSERT INTO `tutorias` (`id_tutoria`, `id_solicitud`, `id_tutor`, `fecha_hora`, `aula_o_link`, `estado_tutoria`, `observaciones`) VALUES
 (1, 1, 1, '2026-06-03 14:30:00', 'Aula Virtual A', 'Realizada', 'Se explicaron las 3 primeras formas normales. El estudiante entendió bien.'),
-(2, 2, 2, '2026-06-04 10:00:00', 'Laboratorio de Simulación 2', 'Realizada', 'Se hicieron ejercicios prácticos de interfaces y clases abstractas.'),
+(2, 2, 1, '2026-06-04 10:00:00', 'Laboratorio de Simulación 2', 'Realizada', 'Se hicieron ejercicios prácticos de interfaces y clases abstractas.'),
 (3, 3, 5, '2026-06-04 16:00:00', 'Cubículo de Tutorías 3', 'Realizada', 'Repaso completo de teoremas de integración.'),
 (4, 4, 3, '2026-06-05 11:00:00', 'Aula Virtual B', 'Realizada', 'Se resolvieron ejercicios de máscaras VLSM.'),
 (5, 5, 4, '2026-06-08 09:00:00', 'Laboratorio de Cómputo 1', 'Realizada', 'Implementación de inserción en árboles AVL.'),
 (6, 6, 1, '2026-06-10 15:00:00', 'Aula Virtual A', 'Programada', 'Pendiente por realizar esta semana.'),
 (7, 1, 1, '2026-06-05 14:30:00', 'Aula Virtual A', 'Realizada', 'Segunda sesión de refuerzo solicitada por el tutor.'),
-(8, 3, 5, '2026-06-06 16:00:00', 'Cubículo de Tutorías 3', 'Cancelada', 'El estudiante tuvo un cruce de horario con un examen.'),
-(9, 9, 14, '2026-06-16 10:00:00', 'Aula Virtual B', 'Programada', 'Traer el diagrama entidad-relación avanzado.'),
-(10, 10, 10, '2026-06-17 15:30:00', 'Cubículo de Tutorías 3', 'Programada', 'Revisión paso a paso del código fuente en C++.'),
-(11, 12, 11, '2026-06-18 09:00:00', 'Laboratorio de Cómputo 1', 'Programada', 'Simulación práctica de procesos concurrentes.'),
-(12, 14, 12, '2026-06-19 11:00:00', 'Aula Virtual C', 'Cancelada', 'Cancelada por problemas de conexión de la tutora.'),
-(13, 14, 12, '2026-06-20 11:00:00', 'Aula Virtual C', 'Programada', 'Sesión de reprogramación para VLSM.'),
-(14, 9, 14, '2026-06-14 14:00:00', 'Aula Virtual B', 'Realizada', 'Se dominó exitosamente la descomposición de tablas.');
+(8, 3, 5, '2026-06-06 16:00:00', 'Cubículo de Tutorías 3', 'Cancelada', 'El estudiante tuvo un cruce de horario con un examen.');
 
 --
--- Indexes for dumped tables
+-- Índices para tablas volcadas
 --
 
 --
--- Indexes for table `estudiantes`
+-- Indices de la tabla `bitacora_sesiones`
+--
+ALTER TABLE `bitacora_sesiones`
+  ADD PRIMARY KEY (`id_bitacora`),
+  ADD KEY `id_tutoria` (`id_tutoria`);
+
+--
+-- Indices de la tabla `control_asistencia`
+--
+ALTER TABLE `control_asistencia`
+  ADD PRIMARY KEY (`id_asistencia`),
+  ADD KEY `id_tutoria` (`id_tutoria`),
+  ADD KEY `id_estudiante` (`id_estudiante`);
+
+--
+-- Indices de la tabla `estudiantes`
 --
 ALTER TABLE `estudiantes`
   ADD PRIMARY KEY (`id_estudiante`),
   ADD UNIQUE KEY `email` (`email`);
 
 --
--- Indexes for table `solicitudes`
+-- Indices de la tabla `solicitudes`
 --
 ALTER TABLE `solicitudes`
   ADD PRIMARY KEY (`id_solicitud`),
   ADD KEY `id_estudiante` (`id_estudiante`);
 
 --
--- Indexes for table `tutores`
+-- Indices de la tabla `tutores`
 --
 ALTER TABLE `tutores`
   ADD PRIMARY KEY (`id_tutor`),
   ADD UNIQUE KEY `email` (`email`);
 
 --
--- Indexes for table `tutorias`
+-- Indices de la tabla `tutorias`
 --
 ALTER TABLE `tutorias`
   ADD PRIMARY KEY (`id_tutoria`),
@@ -205,45 +232,70 @@ ALTER TABLE `tutorias`
   ADD KEY `id_tutor` (`id_tutor`);
 
 --
--- AUTO_INCREMENT for dumped tables
+-- AUTO_INCREMENT de las tablas volcadas
 --
 
 --
--- AUTO_INCREMENT for table `estudiantes`
+-- AUTO_INCREMENT de la tabla `bitacora_sesiones`
+--
+ALTER TABLE `bitacora_sesiones`
+  MODIFY `id_bitacora` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+
+--
+-- AUTO_INCREMENT de la tabla `control_asistencia`
+--
+ALTER TABLE `control_asistencia`
+  MODIFY `id_asistencia` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+
+--
+-- AUTO_INCREMENT de la tabla `estudiantes`
 --
 ALTER TABLE `estudiantes`
-  MODIFY `id_estudiante` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
+  MODIFY `id_estudiante` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
--- AUTO_INCREMENT for table `solicitudes`
+-- AUTO_INCREMENT de la tabla `solicitudes`
 --
 ALTER TABLE `solicitudes`
-  MODIFY `id_solicitud` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+  MODIFY `id_solicitud` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
--- AUTO_INCREMENT for table `tutores`
+-- AUTO_INCREMENT de la tabla `tutores`
 --
 ALTER TABLE `tutores`
-  MODIFY `id_tutor` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
+  MODIFY `id_tutor` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
--- AUTO_INCREMENT for table `tutorias`
+-- AUTO_INCREMENT de la tabla `tutorias`
 --
 ALTER TABLE `tutorias`
-  MODIFY `id_tutoria` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+  MODIFY `id_tutoria` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
--- Constraints for dumped tables
+-- Restricciones para tablas volcadas
 --
 
 --
--- Constraints for table `solicitudes`
+-- Filtros para la tabla `bitacora_sesiones`
+--
+ALTER TABLE `bitacora_sesiones`
+  ADD CONSTRAINT `bitacora_sesiones_ibfk_1` FOREIGN KEY (`id_tutoria`) REFERENCES `tutorias` (`id_tutoria`) ON DELETE CASCADE;
+
+--
+-- Filtros para la tabla `control_asistencia`
+--
+ALTER TABLE `control_asistencia`
+  ADD CONSTRAINT `control_asistencia_ibfk_1` FOREIGN KEY (`id_tutoria`) REFERENCES `tutorias` (`id_tutoria`) ON DELETE CASCADE,
+  ADD CONSTRAINT `control_asistencia_ibfk_2` FOREIGN KEY (`id_estudiante`) REFERENCES `estudiantes` (`id_estudiante`) ON DELETE CASCADE;
+
+--
+-- Filtros para la tabla `solicitudes`
 --
 ALTER TABLE `solicitudes`
   ADD CONSTRAINT `solicitudes_ibfk_1` FOREIGN KEY (`id_estudiante`) REFERENCES `estudiantes` (`id_estudiante`) ON DELETE CASCADE;
 
 --
--- Constraints for table `tutorias`
+-- Filtros para la tabla `tutorias`
 --
 ALTER TABLE `tutorias`
   ADD CONSTRAINT `tutorias_ibfk_1` FOREIGN KEY (`id_solicitud`) REFERENCES `solicitudes` (`id_solicitud`) ON DELETE CASCADE,
