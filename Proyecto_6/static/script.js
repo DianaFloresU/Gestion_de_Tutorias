@@ -79,7 +79,7 @@ fetch("http://127.0.0.1:5000/mostrar_tutorias")
 
 function cerrarSesion() {
   localStorage.removeItem("token");
-  window.location.href = "/";
+  window.location.replace("/");
 }
 
 function toggleFormulario(idFormulario) {

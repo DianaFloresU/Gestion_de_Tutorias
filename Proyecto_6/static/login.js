@@ -28,11 +28,11 @@ function login(){
             localStorage.setItem("id", resultado.data.id);
             
             if(resultado.data.rol === "tutor") {
-                window.location.href = "/dashboard_tutor";
+                window.location.replace("/dashboard_tutor");
             } else if(resultado.data.rol === "estudiante") {
-                window.location.href = "/dashboard_estudiante";
+                window.location.replace("/dashboard_estudiante");
             } else if(resultado.data.rol === "admin") {
-                window.location.href = "/dashboard"
+                window.location.replace("/dashboard");
             }
         } else {
             alert(resultado.data.msg || "Error al ingresar");
