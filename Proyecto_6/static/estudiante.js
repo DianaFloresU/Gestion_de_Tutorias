@@ -53,7 +53,7 @@ function cargarMisTutorias() {
             }
 
             let claseBadge = "pendiente"; 
-            let textoEstado = "";
+            let textoEstado = "PENDIENTE";
 
             if(tutoria.id_tutoria === null) {
                 claseBadge = "pendiente";
@@ -72,8 +72,8 @@ function cargarMisTutorias() {
 
             tabla.innerHTML += `
                 <tr>
-                    <td>${tutoria.id_tutoria !== null ? tutoria.id_tutoria : tutoria.id_solicitud}</td>
-                    <td>Solicitud #${tutoria.asignatura}</td>
+                    <td>${tutoria.id_solicitud}</td>
+                    <td>${tutoria.asignatura}</td>
                     <td>${fechaEsp}</td>
                     <td>${lugarTexto}</td>
                     <td><span class="badge ${claseBadge}">${textoEstado}</span></td>
@@ -149,13 +149,17 @@ function consultarTutoriasPorFecha() {
             html += '<tr><td colspan="6" class="text-center">No hay tutorías en ese rango</td></tr>';
         } else {
             data.forEach(t => {
+                let badgeClase = "programada";
+                if(t.estado.toLowerCase()=== "realizada") badgeClase = "realizada";
+                if(t.estado.toLowerCase() === "cancelada") badgeClase = "cancelada";
+                
                 html += `<tr>
                             <td>${t.id_tutoria}</td>
                             <td>${t.asignatura}</td>
                             <td>${t.estudiante}</td>
                             <td>${t.tutor}</td>
                             <td>${t.fecha_hora}</td>
-                            <td>${t.estado}</td>
+                            <td><span class="badge ${badgeClase}">${t.estado}</span></td>
                          </tr>`;
             });
         }

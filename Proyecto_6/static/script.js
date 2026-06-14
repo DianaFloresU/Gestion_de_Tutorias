@@ -1,4 +1,5 @@
-fetch("http://127.0.0.1:5000/mostrar_estudiantes")
+function mostrar_estudiantes() {
+  fetch("http://127.0.0.1:5000/mostrar_estudiantes")
   .then((response) => response.json())
   .then((data) => {
     const tabla = document.getElementById("tabla-estudiantes");
@@ -26,6 +27,8 @@ fetch("http://127.0.0.1:5000/mostrar_estudiantes")
     });
   })
   .catch((error) => console.error("Error Estudiantes:", error));
+}
+
 
 fetch("http://127.0.0.1:5000/mostrar_solicitudes")
   .then((response) => response.json())
@@ -126,7 +129,98 @@ function cerrarSesion() {
   window.location.replace("/");
 }
 
-function toggleFormulario(idFormulario) {
-  const form = document.getElementById(idFormulario);
-  form.style.display = form.style.display === "none" ? "block" : "none";
+let modoEstudiante = "crear"; 
+let idEstudianteActual = null;
+
+function addEstudiante() {
+    modoEstudiante = "crear";
+    idEstudianteActual = null;
+    
+    document.getElementById("modal-estudiante-titulo").innerText = "Registrar Estudiante";
+    document.getElementById("form-estudiante").reset();
+    document.getElementById("modal-estudiante").style.display = "flex";
 }
+
+function cerrarModalEstudiante() {
+    document.getElementById("modal-estudiante").style.display = "none";
+}
+
+function editarEstudiante(id) {
+    modoEstudiante = "editar";
+    idEstudianteActual = id;
+    document.getElementById("modal-estudiante-titulo").innerText = "Modificar Estudiante";
+    fetch("http://127.0.0.1:5000/mostrar_estudiantes")
+        .then(res => res.json())
+        .then(lista => {
+            const reg = lista.find(item => item.id === id);
+            if (reg) {
+                document.getElementById("est-nombre").value = reg.nombre;
+                document.getElementById("est-apellido").value = reg.apellido;
+                document.getElementById("est-carrera").value = reg.carrera;
+                document.getElementById("est-email").value = reg.email;
+                document.getElementById("modal-estudiante").style.display = "flex";
+            }
+        });
+}
+
+
+document.getElementById("form-estudiante").addEventListener("submit", (e) => {
+  e.preventDefault(); 
+
+  const token = localStorage.getItem("token");
+  const datos = {
+    nombre: document.getElementById("est-nombre").value,
+    apellido: document.getElementById("est-apellido").value,
+    carrera: document.getElementById("est-carrera").value,
+    email: document.getElementById("est-email").value
+  };
+
+  let url = "http://127.0.0.1:5000/agregar_estudiante";
+  let metodo = "POST";
+  let mensajeExito = "Se agregó correctamente el estudiante";
+
+  if (modoEstudiante === "editar") {
+    url = `http://127.0.0.1:5000/modificar_estudiante/${idEstudianteActual}`;
+    metodo = "PUT";
+    mensajeExito = "Se actualizó correctamente el estudiante";
+  }
+
+  fetch(url, {
+    method: metodo,
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`
+    },
+    body: JSON.stringify(datos)
+  })
+  .then(res => {
+    if (!res.ok) throw new Error("Error en la respuesta del servidor");
+    return res.json();
+  })
+  .then(() => {
+    cerrarModalEstudiante();  
+    mostrar_estudiantes();    
+    alert(mensajeExito);   
+  })
+  .catch((error) => {
+    console.error("Error:", error);
+    alert("Ocurrió un error en el servidor");
+  });
+});
+
+function eliminarEstudiante(id) {
+    if (confirm("¿Estás seguro de eliminar este estudiante?")) {
+        const token = localStorage.getItem("token");
+        fetch(`http://127.0.0.1:5000/eliminar_estudiante/${id}`, {
+            method: "DELETE",
+            headers: { "Authorization": `Bearer ${token}` }
+        })
+        .then(res => res.json())
+        .then(data => { 
+            alert(data.msg || "Eliminado"); 
+            mostrar_estudiantes();
+        });
+    }
+}
+
+mostrar_estudiantes();
