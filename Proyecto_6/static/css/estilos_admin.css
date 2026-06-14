@@ -155,19 +155,11 @@ tr:hover {
     color: white;
 }
 
-.btn-editar {
-    background-color: #0077b6;
-}
-.btn-editar:hover {
-    background-color: #0096c7;
-}
+.btn-editar { background-color: #0077b6; }
+.btn-editar:hover { background-color: #0096c7; }
 
-.btn-eliminar {
-    background-color: #e63946;
-}
-.btn-eliminar:hover {
-    background-color: #c1121f;
-}
+.btn-eliminar { background-color: #e63946; }
+.btn-eliminar:hover { background-color: #c1121f; }
 
 .contenedor_tit {
     display: flex;
@@ -196,9 +188,8 @@ tr:hover {
     align-items: center;
 }
 
-.btn-add:hover {
-    background: #0096c7;
-}
+.btn-add:hover { background: #0096c7; }
+
 
 .modal-muestra {
     display: none; 
@@ -247,40 +238,9 @@ tr:hover {
     cursor: pointer;
     transition: color 0.2s;
 }
-.btn-close:hover {
-    color: #ffffff;
-}
 
-#form-estudiante {
-    display: flex;
-    flex-direction: column;
-}
-
-#form-estudiante label {
-    display: block;
-    margin-top: 15px;
-    font-weight: 600;
-    color: #a2a8d3;
-    font-size: 14px;
-    text-align: left;
-}
-
-#form-estudiante input {
-    width: 100%;
-    padding: 12px;
-    margin-top: 6px;
-    background-color: #0b132b;
-    border: 1px solid #3a506b;
-    border-radius: 6px;
-    color: white;
-    font-size: 14px;
-    box-sizing: border-box;
-    word-break: break-all;
-}
-
-#form-estudiante input:focus {
-    outline: none;
-    border-color: #00b4d8;
+.btn-close:hover { 
+    color: #ffffff; 
 }
 
 .btn-submit-modal {
@@ -297,6 +257,44 @@ tr:hover {
     width: 100%;
 }
 
-.btn-submit-modal:hover {
-    background-color: #0096c7;
+.btn-submit-modal:hover { 
+    background-color: #0096c7; 
+}
+
+.form-modal {
+    display: flex;
+    flex-direction: column;
+}
+
+.label-modal {
+    display: block;
+    margin-top: 15px;
+    font-weight: 600;
+    color: #a2a8d3;
+    font-size: 14px;
+    text-align: left;
+}
+
+.input-modal {
+    width: 100%;
+    padding: 12px;
+    margin-top: 6px;
+    background-color: #0b132b;
+    border: 1px solid #3a506b;
+    border-radius: 6px;
+    color: white;
+    font-size: 14px;
+    box-sizing: border-box;
+    font-family: inherit;
+}
+
+.input-modal:focus {
+    outline: none;
+    border-color: #00b4d8;
+}
+
+.txt-area-modal {
+    resize: vertical;  
+    min-height: 80px;  
+    max-height: 160px; 
 }
