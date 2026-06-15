@@ -185,28 +185,43 @@ def mostrar_solicitudes():
 @jwt_required()
 def agregar_solicitud():
     data = request.get_json()
-    cur = mysql.connection.cursor()
-    descripcion_base = data.get['descripcion_problema', '']
-    fecha_inicio = data.get('fecha_inicio')
-    fecha_fin = data.get('fecha_fin')
-
-    fecha_actual = datetime.now().strftime("%Y-%m-%d")
-    if fecha_inicio and fecha_fin:
-        nota_dispo= f"\n\n[Nota de disponibilidad]: Solicito amablemente que la sesión pueda ser programada entre las siguientes fechas: desde el {fecha_inicio} hasta el {fecha_fin}."
-        descripcion_final= f"{descripcion_base}{nota_dispo}"
-    else:
-        descripcion_final= descripcion_base
     
-    if 'id_estudiante' not in data or 'asignatura' not in data or 'estado' not in data:
-        cur.close()
+    if not data or 'id_estudiante' not in data or 'asignatura' not in data or 'estado' not in data:
         return jsonify({"msg": "Faltan campos obligatorios en la solicitud"}), 400
 
-    cur.execute("INSERT INTO Solicitudes (id_estudiante, asignatura, descripcion_problema, fecha_solicitud, estado) VALUES (%s, %s, %s, %s, %s)",
-                (data['id_estudiante'], data['asignatura'], descripcion_final, fecha_actual, data['estado']))
-    mysql.connection.commit()
-    cur.close()
-    return jsonify({"msg": "Solicitud agregada exitosamente"}), 201
+    descripcion_base = data.get('descripcion_problema', '')
+    fecha_inicio = data.get('fecha_inicio')
+    fecha_fin = data.get('fecha_fin')
+    fecha_actual = datetime.now().strftime("%Y-%m-%d")
+    if fecha_inicio and fecha_fin:
+        nota_dispo = f"\n\n[Nota de disponibilidad]: Solicito amablemente que la sesión pueda ser programada entre las siguientes fechas: desde el {fecha_inicio} hasta el {fecha_fin}."
+        descripcion_final = f"{descripcion_base}{nota_dispo}"
+    else:
+        descripcion_final = descripcion_base
+    
+    try:
+        cur = mysql.connection.cursor()
+        
+        query = """
+            INSERT INTO Solicitudes (id_estudiante, asignatura, descripcion_problema, fecha_solicitud, estado) 
+            VALUES (%s, %s, %s, %s, %s)
+        """
+        
+        cur.execute(query, (
+            data['id_estudiante'], 
+            data['asignatura'], 
+            descripcion_final, 
+            fecha_actual, 
+            data['estado']
+        ))   
+        mysql.connection.commit()
+        cur.close()
+        return jsonify({"msg": "Solicitud agregada exitosamente"}), 201
 
+    except Exception as e:
+        print(f"Error detectado en MariaDB: {e}")
+        return jsonify({"msg": "Error interno al guardar en la base de datos"}), 500
+    
 # Endpoint para modificar solicitud, requiere autenticación JWT
 
 @app.route('/modificar_solicitud/<int:id>', methods=['PUT'])

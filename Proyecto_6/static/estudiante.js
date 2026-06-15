@@ -112,7 +112,13 @@ function enviarSolicitud(event) {
         },
         body: JSON.stringify(datosSolicitud)
     })
-    .then(res => res.json())
+    .then(res => {
+        if (!res.ok) {
+            if (res.status === 401) cerrarSesion();
+            throw new Error("Error en el servidor al crear la solicitud");
+        }
+        return res.json(); 
+    })
     .then(data => {
         alert("¡Tu solicitud de tutoría ha sido registrada correctamente!");
         document.getElementById("form-solicitud").reset();
