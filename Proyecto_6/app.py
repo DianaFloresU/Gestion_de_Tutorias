@@ -374,7 +374,7 @@ def reporte_alumnos_demandantes():
 def sesion():
     return render_template("login.html")
 
-@app.route('/dashboard')
+@app.route('/dashboard', methods=['GET'])
 def inicio():
     return render_template("dashboard_administrador.html")
 
