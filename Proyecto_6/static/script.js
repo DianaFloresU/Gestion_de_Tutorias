@@ -130,7 +130,7 @@ function mostrar_tutorias() {
 }
 
 function cerrarSesion() {
-  localStorage.removeItem("token");
+  localStorage.clear();     // Se modifico por clear para eliminar todos los datos almacenados en el localStorage, incluyendo el token, rol, nombre e id del usuario.
   window.location.replace("/");
 }
 
