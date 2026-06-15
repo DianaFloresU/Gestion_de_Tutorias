@@ -14,6 +14,7 @@ db = mysql_backend.connect(
     user="root",
     password="",
     database="gestiontutorias"
+    autocommit=True
 )
 
 # Configuración de la Base de Datos
@@ -551,6 +552,7 @@ def registrar_asistencia():
 @app.route('/bitacoras_tutor', methods=['GET'])
 @jwt_required()
 def obtener_bitacoras_tutor():
+    cursor = None
     try:
         cursor = db.cursor(dictionary=True)
         
@@ -563,7 +565,6 @@ def obtener_bitacoras_tutor():
         """
         cursor.execute(consulta)
         historial = cursor.fetchall()
-        cursor.close()
         
         for registro in historial:
             registro['id_tutoria'] = int(registro['id_tutoria'])
@@ -579,56 +580,29 @@ def obtener_bitacoras_tutor():
     except Exception as e:
         print("FALLO CRÍTICO EN BITACORAS:", str(e))
         return jsonify([]), 200
+    finally:
+        if cursor:
+            cursor.close()
 
 @app.route('/asistencias_tutor', methods=['GET'])
 @jwt_required()
 def obtener_asistencias_tutor():
+    cursor = None
     try:
+        # CADA VEZ QUE SE LLAMA, PEDIMOS UNA CONEXIÓN FRESCA O REINICIAMOS
         cursor = db.cursor(dictionary=True)
+        # Opcional: si la base de datos sigue sin ver los cambios, fuerza un refresco:
+        # db.commit() 
         
-        consulta = """
-            SELECT c.id_tutoria, c.id_estudiante, c.asistio
-            FROM control_asistencia c
-            JOIN tutorias t ON c.id_tutoria = t.id_tutoria
-            ORDER BY c.id_tutoria DESC
-        """
+        consulta = "SELECT * FROM control_asistencia ORDER BY id_asistencia DESC"
         cursor.execute(consulta)
         historial = cursor.fetchall()
-        
-        for registro in historial:
-            registro['id_tutoria'] = int(registro['id_tutoria'])
-            registro['id_estudiante'] = int(registro['id_estudiante'])
-            registro['asistio'] = str(registro['asistio'])
-            
-            try:
-                cursor.execute("SELECT nombre FROM estudiantes WHERE id_estudiante = %s", (registro['id_estudiante'],))
-                est = cursor.fetchone()
-                if est:
-                    registro['estudiante'] = est['nombre']
-                else:
-                    cursor.execute("SELECT nombre FROM estudiantes WHERE id_usuario = %s", (registro['id_estudiante'],))
-                    est_alt = cursor.fetchone()
-                    registro['estudiante'] = est_alt['nombre'] if est_alt else f"Estudiante {registro['id_estudiante']}"
-            except:
-                registro['estudiante'] = f"Estudiante {registro['id_estudiante']}"
-                
-            try:
-                cursor.execute("SELECT id_solicitud FROM tutorias WHERE id_tutoria = %s", (registro['id_tutoria'],))
-                tut = cursor.fetchone()
-                if tut and tut['id_solicitud']:
-                    cursor.execute("SELECT asignatura FROM solicitudes WHERE id_solicitud = %s", (tut['id_solicitud'],))
-                    sol = cursor.fetchone()
-                    registro['asignatura'] = sol['asignatura'] if sol else "Tutoría"
-                else:
-                    registro['asignatura'] = "Tutoría"
-            except:
-                registro['asignatura'] = "Tutoría"
-                
-        cursor.close()
         return jsonify(historial), 200
     except Exception as e:
-        print("FALLO CRÍTICO EN ASISTENCIAS:", str(e))
-        return jsonify([]), 200
+        return jsonify({"error": str(e)}), 500
+    finally:
+        if cursor:
+            cursor.close()
     
 if __name__ == '__main__':
     app.run(debug=True)
