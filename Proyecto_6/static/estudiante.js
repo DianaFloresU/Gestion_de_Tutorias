@@ -126,7 +126,7 @@ function enviarSolicitud(event) {
 
 function cerrarSesion() {
     localStorage.clear();
-    window.location.href = "/";
+    window.location.replace("/");
 }
 
 function consultarTutoriasPorFecha() {
