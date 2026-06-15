@@ -425,71 +425,67 @@
             })
             .then(res => res.json())
             .then(data => {
-                console.log("Datos recibidos en Bitácoras:", data);
                 const tabla = document.getElementById('tabla-historial-bitacoras');
-                if (!tabla) return;
+                if (!tabla) {
+                    console.error("No se encontró el elemento tabla-historial-bitacoras");
+                    return;
+                }
                 tabla.innerHTML = '';
-
+                
                 if (!data || data.length === 0) {
-                    tabla.innerHTML = '<tr><td colspan="5" style="text-align:center;">No hay bitácoras registradas</td></tr>';
+                    tabla.innerHTML = '<tr><td colspan="5">No hay bitácoras registradas</td></tr>';
                     return;
                 }
 
                 data.forEach(bitacora => {
-                    const id_tutoria = bitacora.id_tutoria !== undefined ? bitacora.id_tutoria : 'N/A';
-                    const fecha_hora = (bitacora.fecha || '') + ' ' + (bitacora.hora || '');
-                    const temas = bitacora.temas_abordados || 'N/A';
-                    const obs = bitacora.observaciones_rendimiento || '';
-                    const tareas = bitacora.tareas_asignadas || '';
-
                     tabla.innerHTML += `
                         <tr>
-                            <td>${id_tutoria}</td>
-                            <td>${fecha_hora}</td>
-                            <td>${temas}</td>
-                            <td>${obs}</td>
-                            <td>${tareas}</td>
+                            <td>${bitacora.id_tutoria || 'N/A'}</td>
+                            <td>${(bitacora.fecha || '') + ' ' + (bitacora.hora || '')}</td>
+                            <td>${bitacora.temas_abordados || 'N/A'}</td>
+                            <td>${bitacora.observaciones_rendimiento || ''}</td>
+                            <td>${bitacora.tareas_asignadas || ''}</td>
                         </tr>`;
                 });
             })
-            .catch(error => console.error('Error al cargar historial de bitácoras:', error));
+            .catch(error => console.error('Error crítico en Bitácoras:', error));
         }
 
         function cargarHistorialAsistencias() {
-            fetch('http://127.0.0.1:5000/asistencias_tutor', {
+            // Añadimos un timestamp al final de la URL para que sea única cada vez
+            const timestamp = new Date().getTime(); 
+            fetch(`http://127.0.0.1:5000/asistencias_tutor?t=${timestamp}`, {
                 method: 'GET',
                 headers: { 'Authorization': `Bearer ${token}` }
             })
             .then(res => res.json())
             .then(data => {
-                console.log("Datos recibidos en Asistencias:", data);
                 const tabla = document.getElementById('tabla-historial-asistencias');
                 if (!tabla) return;
-                tabla.innerHTML = '';
+                
+                tabla.innerHTML = ''; // Limpiamos la tabla
 
                 if (!data || data.length === 0) {
-                    tabla.innerHTML = '<tr><td colspan="5" style="text-align:center;">No hay controles de asistencia registrados</td></tr>';
+                    tabla.innerHTML = '<tr><td colspan="5" style="text-align:center;">No hay registros</td></tr>';
                     return;
                 }
 
                 data.forEach(asistencia => {
-                    const id_tutoria = asistencia.id_tutoria !== undefined ? asistencia.id_tutoria : 'N/A';
-                    const id_estudiante = asistencia.id_estudiante !== undefined ? asistencia.id_estudiante : 'N/A';
-                    const estudiante = asistencia.estudiante || 'N/A';
-                    const asignatura = asistencia.asignatura || 'N/A';
-                    const estadoAsis = asistencia.asistio || 'N/A';
-
+                    // Asegúrate de que las propiedades coincidan exactamente con lo que devuelve el JSON
+                    const estado = asistencia.asistio || 'N/A';
                     tabla.innerHTML += `
                         <tr>
-                            <td>${id_tutoria}</td>
-                            <td>${id_estudiante}</td>
-                            <td>${estudiante}</td>
-                            <td>${asignatura}</td>
-                            <td><span class="estado ${estadoAsis.toLowerCase()}">${estadoAsis}</span></td>
+                            <td>${asistencia.id_tutoria}</td>
+                            <td>${asistencia.id_estudiante}</td>
+                            <td>${asistencia.estudiante}</td>
+                            <td>${asistencia.asignatura}</td>
+                            <td><span class="estado ${estado.toLowerCase()}">${estado}</span></td>
                         </tr>`;
                 });
             })
-            .catch(error => console.error('Error al cargar historial de asistencias:', error));
+            .catch(error => {
+                console.error('Error al cargar asistencias:', error);
+            });
         }
 
         function limpiarFormulario(idForm) {
@@ -546,16 +542,26 @@
             })
             .then(res => res.json())
             .then(data => {
-                alert("Control de asistencia guardado de forma exitosa.");
+                alert("Control de asistencia guardado exitosamente.");
                 limpiarFormulario('form-asistencia');
-                cargarHistorialAsistencias();
+                
+                // AÑADIMOS UN RETRASO DE 500ms (MEDIO SEGUNDO)
+                // Esto le da tiempo al servidor para actualizar el historial
+                setTimeout(() => {
+                    cargarHistorialAsistencias();
+                }, 500);
             })
-            .catch(err => alert("Error al registrar la asistencia."));
+            .catch(err => {
+                console.error("Error:", err);
+                alert("Hubo un error al registrar.");
+            });
         }
-
         function cerrarSesion() {
+
             localStorage.clear();
+
             window.location.replace("/");
+
         }
     </script>
 </body>
