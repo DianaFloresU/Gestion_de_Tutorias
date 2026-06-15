@@ -13,7 +13,7 @@ db = mysql_backend.connect(
     host="localhost",
     user="root",
     password="",
-    database="gestiontutorias"
+    database="gestiontutorias",
     autocommit=True
 )
 
