@@ -25,14 +25,12 @@ function login(){
             localStorage.setItem("token", resultado.data.access_token);
             localStorage.setItem("rol", resultado.data.rol);
             localStorage.setItem("nombre", resultado.data.nombre);
-            localStorage.setItem("id", resultado.data.id);
+            localStorage.setItem("id", resultado.data.id); // <-- Esta línea se aumentó
             
             if(resultado.data.rol === "tutor") {
-                window.location.replace("/dashboard_tutor");
+                window.location.href = "/dashboard_tutor"; // <-- Esta redirección se aumentó
             } else if(resultado.data.rol === "estudiante") {
-                window.location.replace("/dashboard_estudiante");
-            } else if(resultado.data.rol === "admin") {
-                window.location.replace("/dashboard");
+                window.location.href = "/dashboard_estudiante";
             }
         } else {
             alert(resultado.data.msg || "Error al ingresar");
