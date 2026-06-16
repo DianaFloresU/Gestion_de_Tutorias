@@ -246,6 +246,54 @@ def eliminar_solicitud(id):
     cur.close()
     return jsonify({"msg": "Solicitud eliminada exitosamente"}), 200
 
+#-------------------------------------------------------------------------------------
+# ENDPOINT PARA OBTENER LOS DATOS DE UNA SOLICITUD POR ID (GET) 
+# ASOCIADO AL BOTON DE EDITAR SOLICITUD DEL PANEL ESTUDIANTE CARGA LOS DATOS DE LA SOLICITUD EN EL MODAL
+@app.route('/obtener_solicitud/<int:id_solicitud>', methods=['GET'])
+@jwt_required()
+def obtener_solicitud(id_solicitud):
+    try:
+        cur = mysql.connection.cursor()
+        cur.execute("SELECT asignatura, descripcion_problema FROM Solicitudes WHERE id_solicitud = %s", (id_solicitud,))
+        solicitud = cur.fetchone()
+        cur.close()
+        
+        if solicitud:
+            return jsonify({
+                "asignatura": solicitud[0],
+                "descripcion_problema": solicitud[1]
+            }), 200
+        return jsonify({"msg": "Solicitud no encontrada"}), 404
+    except Exception as e:
+        return jsonify({"msg": str(e)}), 500
+
+# ENDPOINT PARA ACTUALIZAR LA ASIGNATURA Y DESCRIPCIÓN (PUT)
+# ASOCIADO AL BOTON DE GUARDAR CAMBIOS DEL MODAL DE EDITAR SOLICITUD DEL PANEL ESTUDIANTE
+@app.route('/actualizar_solicitud/<int:id_solicitud>', methods=['PUT'])
+@jwt_required()
+def actualizar_solicitud(id_solicitud):
+    data = request.get_json()
+    asignatura = data.get('asignatura')
+    descripcion_problema = data.get('descripcion_problema')
+
+    if not asignatura or not descripcion_problema:
+        return jsonify({"msg": "Campos obligatorios incompletos"}), 400
+
+    try:
+        cur = mysql.connection.cursor()
+        cur.execute("""
+            UPDATE Solicitudes 
+            SET asignatura = %s, descripcion_problema = %s 
+            WHERE id_solicitud = %s
+        """, (asignatura, descripcion_problema, id_solicitud))
+        
+        mysql.connection.commit()
+        cur.close()
+        return jsonify({"msg": "Solicitud actualizada correctamente"}), 200
+    except Exception as e:
+        return jsonify({"msg": str(e)}), 500
+
+
 # Endpoint para mostrar tutorías
 
 @app.route('/mostrar_tutorias', methods=['GET'])

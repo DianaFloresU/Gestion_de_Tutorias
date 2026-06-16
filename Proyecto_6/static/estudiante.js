@@ -37,7 +37,7 @@ function cargarMisTutorias() {
         tabla.innerHTML = "";
 
         data.forEach(tutoria => {
-            let fechaEsp = "Sin fecha asignada aun";
+            let fechaEsp = "Sin fecha asignada";
             if(tutoria.fecha_hora) {
                 const fechaHora = new Date(tutoria.fecha_hora);
                 const opcionesFecha= { 
@@ -70,6 +70,21 @@ function cargarMisTutorias() {
 
             const lugarTexto = tutoria.aula_o_link ? tutoria.aula_o_link : "Por asignar";
 
+            let accionesHTML= "";
+            if (tutoria.id_tutoria === null) {
+                accionesHTML = `
+                <div class="contenedor-acciones">
+                    <button class="btn-accion btn-editar" onclick="abrirModificarSolicitud(${tutoria.id_solicitud})" title="Modificar">
+                        <i class="fas fa-pencil-alt"></i>
+                    </button>
+                    <button class="btn-accion btn-eliminar" onclick="confirmarEliminarSolicitud(${tutoria.id_solicitud})" title="Eliminar">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>`;
+            } else {
+                accionesHTML = `<span style="color: #6c757d; font-size: 11px; font-style: italic;">Sin acciones</span>`;
+            }
+
             tabla.innerHTML += `
                 <tr>
                     <td>${tutoria.id_solicitud}</td>
@@ -77,12 +92,109 @@ function cargarMisTutorias() {
                     <td>${fechaEsp}</td>
                     <td>${lugarTexto}</td>
                     <td><span class="badge ${claseBadge}">${textoEstado}</span></td>
+                    <td>${accionesHTML}</td>
                 </tr>`;
         });
     })
     .catch(error => console.error("Error al mapear datos desde MariaDB:", error));
 }
+//----------------------------------------------------------
+//funcion para editar una solicitud pendiente del panel del esudiante 
+function abrirModificarSolicitud(idSolicitud) {
+    console.log("Cargando datos para modificar solicitud ID:", idSolicitud);
+    
+    document.getElementById("edit-sol-id").value = idSolicitud;
+    
+    const modal = document.getElementById("modal-solicitud-estudiante");
+    if (modal) modal.style.display = "flex";
 
+    fetch(`http://127.0.0.1:5000/obtener_solicitud/${idSolicitud}`, {
+        method: "GET",
+        headers: {
+            "Authorization": `Bearer ${token}` 
+        }
+    })
+    .then(res => {
+        if (!res.ok) throw new Error("Error al recuperar datos del servidor");
+        return res.json();
+    })
+    .then(data => {
+        document.getElementById("edit-sol-asignatura").value = data.asignatura;
+        document.getElementById("edit-sol-descripcion").value = data.descripcion_problema;
+    })
+    .catch(error => {
+        console.error("Error al cargar la solicitud:", error);
+        alert("No se pudieron cargar los datos actuales de la solicitud.");
+    });
+}
+
+function cerrarModalEstudiante() {
+    const modal = document.getElementById("modal-solicitud-estudiante");
+    if (modal) modal.style.display = "none";
+}
+document.getElementById("form-modificar-solicitud-estudiante").addEventListener("submit", function(event) {
+    event.preventDefault(); 
+
+    const idSolicitud = document.getElementById("edit-sol-id").value;
+    
+    const datosModificados = {
+        asignatura: document.getElementById("edit-sol-asignatura").value,
+        descripcion_problema: document.getElementById("edit-sol-descripcion").value
+    };
+
+    fetch(`http://127.0.0.1:5000/actualizar_solicitud/${idSolicitud}`, {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify(datosModificados)
+    })
+    .then(res => {
+        if (!res.ok) throw new Error("Fallo al actualizar en el servidor");
+        return res.json();
+    })
+    .then(data => {
+        cerrarModalEstudiante();
+        cargarMisTutorias();
+    })
+    .catch(error => {
+        console.error("Error al actualizar:", error);
+        alert("Hubo un problema y no se guardaron los cambios.");
+    });
+});
+//------------------------------------------------------------------------------------------
+// Función para confirmar eliminación de solicitud en estado pendiente del panel estudiante
+function confirmarEliminarSolicitud(id) { 
+    console.log("Intentando eliminar solicitud con ID:", id);
+    
+    const respuesta = confirm(`¿Estás seguro que deseas eliminar permanentemente esta solicitud?`);
+    
+    if (respuesta) {
+        fetch(`http://127.0.0.1:5000/eliminar_solicitud/${id}`, {
+            method: "DELETE",
+            headers: {
+                "Authorization": `Bearer ${token}` 
+            }
+        })
+        .then(res => {
+            if (!res.ok) {
+                throw new Error("No se pudo eliminar la solicitud en el servidor.");
+            }
+            return res.json();
+        })
+        .then(data => {
+            alert(`Tu solicitud ha sido eliminada con éxito`);
+            cargarMisTutorias(); 
+        })
+        .catch(error => {
+            console.error("Error al eliminar:", error);
+            alert("Hubo un problema al intentar eliminar la solicitud.");
+        });
+    }
+}
+//-----------------------------------------------
+// Funcion para enviar el formulario de solicitud
 function enviarSolicitud(event) {
     event.preventDefault();
 

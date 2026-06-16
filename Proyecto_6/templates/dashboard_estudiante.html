@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel de Control - Estudiante</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/estilos.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <script>
         if (!localStorage.getItem("token")) {
             window.location.replace("/");
@@ -14,7 +15,7 @@
 <body>
 
     <header>
-        <h2>Panel de Acompañamiento Académico</h2>
+        <h2>Panel de Gestion de Tutorias - Estudiante</h2>
         <div>
             <span id="nombre-usuario" style="font-weight: 600; margin-right: 20px; color: #00b4d8;">Estudiante</span>
             <button class="btn-logout" onclick="cerrarSesion()">Cerrar Sesión</button>
@@ -23,44 +24,66 @@
 
     <div class="main-container">
         <nav>
-            <button class="active" onclick="cambiarSeccion('solicitudes', this)">Solicitudes</button>
-            <button onclick="cambiarSeccion('tutorias', this)">Tutorías</button>
+            <button class="active" onclick="cambiarSeccion('solicitudes', this)">Solicitud de tutoria</button>
+            <button onclick="cambiarSeccion('tutorias', this)">Mis tutorías</button>
         </nav>
 
         <main>
             <section id="solicitudes" class="content-section active">
-                <h3>Solicitud de Tutoría</h3>
-                <form id="form-solicitud" onsubmit="enviarSolicitud(event)">
-                    <label for="asignatura">Asignatura</label>
-                    <select id="asignatura" required>
-                        <option value="">Selecciona una materia...</option>
-                        <option value="Base de Datos I">Base de Datos I</option>
-                        <option value="Programación II">Programación II</option>
-                        <option value="Cálculo I">Cálculo I</option>
-                        <option value="Redes de Computadoras">Redes de Computadoras</option>
-                    </select>
+                <div class="seccion-solicitud-container"> comentario 
+                    <div class="tarjeta-formulario-solicitud">
+                        <h3>Solicitud de Tutoría</h3>
+                        <form id="form-solicitud" onsubmit="enviarSolicitud(event)">
+                            <label for="asignatura">Asignatura</label>
+                            <select id="asignatura" required>
+                                <option value="">Selecciona una materia</option>
+                                <option value="Base de Datos I">Base de Datos I</option>
+                                <option value="Programación II">Programación II</option>
+                                <option value="Cálculo I">Cálculo I</option>
+                                <option value="Redes de Computadoras">Redes de Computadoras</option>
+                            </select>
 
-                    <label for="descripcion">Descripción de tus dificultades</label>
-                    <textarea id="descripcion" rows="4" placeholder="Describe detalladamente los temas o algoritmos que necesitas reforzar..." required></textarea>
+                            <label for="descripcion">Descripción de tus dificultades</label>
+                            <textarea id="descripcion" rows="4" placeholder="Describe detalladamente los temas que necesitas reforzar." required></textarea>
 
-                    <label>Rango de Fechas Disponibles</label>
-                    <div class="row-fechas">
-                        <div>
-                            <span style="font-size: 12px; color: #a2a8d3;">Desde:</span>
-                            <input type="date" id="fecha-inicio" required style="width: 100%;">
+                            <label>Rango de Fechas Disponibles</label>
+                            <div class="row-fechas">
+                                <div>
+                                    <span style="font-size: 12px; color: #a2a8d3;">Desde:</span>
+                                    <input type="date" id="fecha-inicio" required style="width: 100%;">
+                                </div>
+                                <div>
+                                    <span style="font-size: 12px; color: #a2a8d3;">Hasta:</span>
+                                    <input type="date" id="fecha-fin" required style="width: 100%;">
+                                </div>
+                            </div>
+
+                            <button type="submit">Enviar Solicitud</button>
+                        </form>
+                    </div>
+                    <div class="tarjeta-info-derecha">
+                        <h3 class="solicitud-titulo" style="color: #00f0ff;"><i class="fas fa-info-circle"></i> Recordatorios Importantes</h3>
+                        
+                        <div class="bloque-instruccion">
+                            <h4><i class="fas fa-check-circle" style="color: #28a745;"></i> Claridad en la Descripción</h4>
+                            <p>Por favor, detalla los temas específicos (ej. límites algebraicos, integrales por partes). Esto ayuda al tutor a preparar material adecuado para tu sesión.</p>
                         </div>
-                        <div>
-                            <span style="font-size: 12px; color: #a2a8d3;">Hasta:</span>
-                            <input type="date" id="fecha-fin" required style="width: 100%;">
+
+                        <div class="bloque-instruccion">
+                            <h4><i class="fas fa-calendar-alt" style="color: #ffc107;"></i> Rango de Fechas</h4>
+                            <p>Selecciona un rango de disponibilidad de al menos 3 días para facilitar la asignación de un tutor disponible en tu horario.</p>
+                        </div>
+
+                        <div class="bloque-instruccion">
+                            <h4><i class="fas fa-clock" style="color: #00f0ff;"></i> Seguimiento</h4>
+                            <p>Una vez enviada, podrás revisar el estado de asignación de aula y fecha en la sección de la barra lateral <b>"Tutorías"</b>.</p>
                         </div>
                     </div>
-
-                    <button type="submit">Enviar Solicitud Académica</button>
-                </form>
+                </div>
             </section>
 
             <section id="tutorias" class="content-section">
-                <h3>Mis Tutorías y Estados</h3>
+                <h3>Mis Tutorías</h3>
                 <table style="margin-top: 20px;">
                     <thead>
                         <tr>
@@ -69,6 +92,7 @@
                             <th>Fecha y Hora</th>
                             <th>Aula / Enlace Virtual</th>
                             <th>Estado</th>
+                            <th>Acciones</th>
                         </tr>
                     </thead>
                     <tbody id="tabla-tutorias-estudiante">
@@ -96,6 +120,26 @@
 
             </section>
         </main>
+    </div>
+    
+    <div id="modal-solicitud-estudiante" class="modal-muestra" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-cabeza">
+                <h3 id="modal-solicitud-titulo">Editar Solicitud</h3>
+                <button class="btn-close" onclick="cerrarModalEstudiante()">&times;</button>
+            </div>
+            <form id="form-modificar-solicitud-estudiante" class="form-modal">
+                <input type="hidden" id="edit-sol-id">
+
+                <label class="label-modal">Asignatura:</label>
+                <input type="text" id="edit-sol-asignatura" class="input-modal" required>
+                
+                <label class="label-modal">Descripción del Problema:</label>
+                <textarea id="edit-sol-descripcion" class="input-modal txt-area-modal" rows="4" required></textarea>
+                
+                <button type="submit" class="btn-submit-modal">Guardar Cambios</button>
+            </form>
+        </div>
     </div>
 
     <script src="{{ url_for('static', filename='estudiante.js') }}"></script>

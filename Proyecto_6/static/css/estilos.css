@@ -431,21 +431,28 @@ body {
 }
 
 .btn-accion {
-    padding: 6px 12px;
+    padding: 6px 10px;
     border: none;
-    border-radius: 4px;
-    font-size: 13px;
+    border-radius: 6px;
+    font-size: 14px;
     font-weight: 600;
     cursor: pointer;
-    transition: background-color 0.2s;
+    transition: background-color 0.2s, transform 0.1s;
     color: white;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
-.btn-editar { background-color: #0077b6; }
-.btn-editar:hover { background-color: #0096c7; }
+.btn-accion:active{
+    transform: scale(0.95);
+}
+
+.btn-editar { background-color: #00b4d8; }
+.btn-editar:hover { background-color: #0077b6; }
 
 .btn-eliminar { background-color: #e63946; }
-.btn-eliminar:hover { background-color: #c1121f; }
+.btn-eliminar:hover { background-color: #c32f3a; }
 
 .btn-add {
     background: #0077b6;
@@ -460,6 +467,12 @@ body {
     align-items: center;
 }
 .btn-add:hover { background: #0096c7; }
+.contenedor-acciones {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+    align-items: center;
+}
 
 .contenedor_tit {
     display: flex;
