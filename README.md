@@ -42,6 +42,56 @@ El sistema implementa un esquema de seguridad basado en tokens de acceso **JWT (
 * Las consultas relacionales inyectan parámetros limpios (`%s`) mediante tuplas en el cursor de base de datos para prevenir de raíz ataques de **Inyección SQL**.
 
 ---
+---
+
+## 🔧 Instalación y Guía de Despliegue Local
+
+Sigue estos pasos en orden para clonar, configurar y poner en marcha el proyecto en tu entorno de desarrollo.
+
+### 1. Clonar el repositorio
+Abre una terminal y descarga el código fuente del proyecto:
+bash
+git clone [https://github.com/TuUsuario/Gestion-Tutorias.git](https://github.com/TuUsuario/Gestion-Tutorias.git)
+cd Gestion-Tutorias
+
+---
+
+### 2. Crear y activar el entorno virtual
+# En Windows:
+python -m venv env
+.\env\Scripts\activate
+
+# En macOS/Linux:
+python3 -m venv env
+source env/bin/activate
+
+---
+
+### 3. Instalación de paquetes requeridos
+pip install -r requirements.txt
+
+---
+
+### 4. Cómo ejecutar migraciones de la Base de Datos
+Para construir la estructura relacional, restricciones de llaves foráneas y el esquema inicial de datos del sistema en tu servidor de MariaDB o MySQL, sigue estas instrucciones:
+
+#### 4.1. Asegúrate de tener tu servidor local activo (XAMPP, WampServer o servicio nativo de MariaDB).
+
+#### 4.2. Abre tu gestor de base de datos preferido (phpMyAdmin, DBeaver, MySQL Workbench o consola) y crea el esquema
+CREATE DATABASE gestiontutorias CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+#### 4.3. Importa el script de migración que se encuentra en la carpeta raíz del proyecto para poblar las tablas
+# Desde la consola de MySQL/MariaDB ejecuta:
+mysql -u tu_usuario -p gestiontutorias < database/gestiontutorias.sql
+
+---
+
+### 5. Cómo correr el servidor
+Una vez instaladas las dependencias y estructurada la base de datos, levanta el core de la API web ejecutando
+
+# Ejecución estándar en desarrollo
+python app.py
+
 
 ## 📂 Estructura del Proyecto
 
