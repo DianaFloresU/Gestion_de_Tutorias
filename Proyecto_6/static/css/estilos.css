@@ -494,3 +494,72 @@ table, .tabla-tutorias {
     table-layout: auto; 
     word-wrap: break-word;
 }
+
+.seccion-solicitud-container {
+    display: flex;
+    gap: 24px;
+    align-items: stretch; 
+    width: 100%;
+    max-width: 1100px; 
+    margin: 0 auto;
+}
+
+.tarjeta-formulario-solicitud {
+    flex: 1.2; 
+    background-color: #111827;
+    padding: 24px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.tarjeta-info-derecha {
+    flex: 0.8;
+    background-color: #111827;
+    padding: 24px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.solicitud-titulo {
+    font-size: 18px;
+    margin-bottom: 20px;
+    font-weight: 600;
+}
+
+.bloque-instruccion {
+    margin-bottom: 16px;
+    background: rgba(255, 255, 255, 0.02);
+    padding: 12px;
+    border-radius: 8px;
+    border-left: 3px solid #00f0ff;
+}
+
+.bloque-instruccion h4 {
+    font-size: 14px;
+    color: #ffffff;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.bloque-instruccion p {
+    font-size: 12.5px;
+    color: #9ca3af;
+    line-height: 1.5;
+    margin: 0;
+}
+
+.rango-fechas-container {
+    display: flex;
+    gap: 16px;
+    width: 100%;
+    margin-top: 12px;
+}
+
+.rango-fechas-container > div {
+    flex: 1;
+}
