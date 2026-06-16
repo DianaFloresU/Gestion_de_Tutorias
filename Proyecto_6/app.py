@@ -362,43 +362,59 @@ def asignaturas_mas_solicitadas():
         resultado.append({'asignatura': row[0], 'total_solicitudes': row[1], 'alumnos_unicos': row[2]})
     return jsonify(resultado), 200
 
-@app.route('/tutorias_por_fecha', methods=['GET'])
+@app.route('/tutorias_por_fecha', methods=['GET']) # Mantiene la misma ruta exacta
 @jwt_required()
 def tutorias_por_fecha():
+    # 1. Extraemos el email del estudiante logueado desde el token JWT
+    email_estudiante = get_jwt_identity()
+    
     fecha_inicio = request.args.get('fecha_inicio')
     fecha_fin = request.args.get('fecha_fin')
     
     if not fecha_inicio or not fecha_fin:
         return jsonify({"msg": "Debe proporcionar fecha_inicio y fecha_fin en formato YYYY-MM-DD"}), 400
     
-    cursor = mysql.connection.cursor()
-    cursor.execute("""
-        SELECT t.id_tutoria, s.asignatura,
-               CONCAT(e.nombre, ' ', e.apellido) AS estudiante,
-               CONCAT(tu.nombre, ' ', tu.apellido) AS tutor,
-               t.fecha_hora, t.estado_tutoria
-        FROM tutorias t
-        JOIN solicitudes s ON t.id_solicitud = s.id_solicitud
-        JOIN estudiantes e ON s.id_estudiante = e.id_estudiante
-        JOIN tutores tu ON t.id_tutor = tu.id_tutor
-        WHERE DATE(t.fecha_hora) BETWEEN %s AND %s
-        ORDER BY t.fecha_hora DESC """,
-    (fecha_inicio, fecha_fin))
-    rows = cursor.fetchall()
-    cursor.close()
-    
-    resultado = []
-    for row in rows:
-        resultado.append({
-            'id_tutoria': row[0],
-            'asignatura': row[1],
-            'estudiante': row[2],
-            'tutor': row[3],
-            'fecha_hora': str(row[4]),
-            'estado': row[5]
-        })
-    return jsonify(resultado), 200
+    try:
+        cursor = mysql.connection.cursor()
+        
+        # 2. Query optimizado con LEFT JOIN y filtro de email del estudiante logueado
+        query = """
+            SELECT t.id_tutoria, s.asignatura,
+                   CONCAT(e.nombre, ' ', e.apellido) AS estudiante,
+                   IF(tu.nombre IS NOT NULL, CONCAT(tu.nombre, ' ', tu.apellido), 'Por asignar') AS tutor,
+                   t.fecha_hora, t.estado_tutoria
+            FROM tutorias t
+            LEFT JOIN solicitudes s ON t.id_solicitud = s.id_solicitud
+            LEFT JOIN estudiantes e ON s.id_estudiante = e.id_estudiante
+            LEFT JOIN tutores tu ON t.id_tutor = tu.id_tutor
+            WHERE (DATE(t.fecha_hora) BETWEEN %s AND %s OR t.fecha_hora IS NULL)
+              AND e.email = %s
+            ORDER BY t.fecha_hora DESC
+        """
+        
+        # 3. Enviamos los parámetros en el orden exacto de los %s
+        cursor.execute(query, (fecha_inicio, fecha_fin, email_estudiante))
+        rows = cursor.fetchall()
+        cursor.close()
+        
+        resultado = []
+        for row in rows:
+            resultado.append({
+                'id_tutoria': row[0],
+                'asignatura': row[1],
+                'estudiante': row[2],
+                'tutor': row[3],
+                # Evitamos errores si la fecha_hora en la base de datos es NULL
+                'fecha_hora': str(row[4]) if row[4] else "Sin fecha asignada aún",
+                'estado': row[5] if row[5] else "PENDIENTE"
+            })
+            
+        return jsonify(resultado), 200
 
+    except Exception as e:
+        print(f"Error crítico en tutorias_por_fecha: {e}")
+        return jsonify({"msg": "Error interno del servidor"}), 500
+    
 @app.route('/api/reportes/alumnos_demandantes', methods=['GET'])
 @jwt_required()
 def reporte_alumnos_demandantes():
